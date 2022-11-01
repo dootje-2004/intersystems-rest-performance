@@ -1,0 +1,14 @@
+version: "3"
+services:
+  client:
+    image: intersystemsdc/iris-community:latest
+    container_name: rest-client
+    ports:
+      - "9090:52773"
+  server:
+    image: intersystemsdc/iris-community:latest
+    container_name: rest-server
+    ports:
+      - "9091:52773"
+networks:
+  default:
