@@ -15,9 +15,11 @@ Send a controlled number of requests per second from one IRIS instance (the *cli
 Have a dashboard show the time it takes to pass each stage of the processing (network, unpacking, business logic, storage, response).
 
 Parameters on the client side:
+
 * Number of requests per second
 * Type of request (GET, PUT, PATCH, DELETE)
 * Payload size
 
 Parameters on the server side:
+
 * Number of threads (parallel processes) handling the requests
