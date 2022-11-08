@@ -7,7 +7,7 @@ Class REST.Manifest
 XData Manifest [ XMLNamespace = INSTALLER ]
 {
 <Manifest>
-    <Var Name="NAMESPACE" Value="REST"/> 
+    <Var Name="NAMESPACE" Value="DEMO"/> 
     <Log Level="3" Text="Start manifest" />
     <Namespace Name="${NAMESPACE}" Code="${NAMESPACE}" Data="${NAMESPACE}">
         <Configuration>
