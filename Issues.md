@@ -26,3 +26,10 @@ The manifest is missing a database configuration clause.
 *Documatic reports `This class has no methods or properties`, but the `setup` class method definitely exists.*
 Apparently the method name `setup` is special and ignored by Documatic.
 Adding a dummy class method shows that Documatic does actually work.
+
+*New init files are missing in the server container.*
+Bug: The `docker-compose.yml` file pointed the server config to the client environment.
+
+*Containers exit immediately after Docker update.*
+See [this post](https://community.intersystems.com/post/using-intersystems-iris-containers-docker-201014).
+Adding `command: --check-caps false` to `docker-compose.yml` fixes it.

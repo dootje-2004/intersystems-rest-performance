@@ -7,13 +7,15 @@ services:
     container_name: rest-client
     ports:
       - "9090:52773"
+    command: --check-caps false
 
   server:
     build:
-      context: ./client
+      context: ./server
     container_name: rest-server
     ports:
       - "9091:52773"
+    command: --check-caps false
 
 networks:
   default:

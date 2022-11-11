@@ -51,7 +51,8 @@
               "$ref": "#/definitions/StatusObject"
             }
           }
-        }
+        },
+        "operationId": "processPayload"
       }
     }
   },
@@ -59,6 +60,10 @@
     "Payload": {
       "type": "object",
       "properties": {
+        "id": {
+          "description": "Unique identifier",
+          "type": "integer"
+        },
         "timestamp": {
           "description": "Client timestamp",
           "type": "string"

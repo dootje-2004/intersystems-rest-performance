@@ -5,7 +5,5 @@ FROM ${IMAGE}
 USER irisowner
 
 ENV INIT_DIR=/home/irisowner
-# ENV ISC_PACKAGE_INSTANCENAME=REST_CLIENT
-COPY ./init/* ${INIT_DIR}/
-# RUN iris rename IRIS $ISC_PACKAGE_INSTANCENAME && ${INIT_DIR}/init.sh
+COPY --chown=irisowner ./init/* ${INIT_DIR}/
 RUN ${INIT_DIR}/init.sh

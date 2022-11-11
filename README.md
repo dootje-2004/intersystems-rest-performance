@@ -17,7 +17,6 @@ Have a dashboard show the time it takes to pass each stage of the processing (ne
 Parameters on the client side:
 
 * Number of requests per second
-* Type of request (GET, PUT, PATCH, DELETE)
 * Payload size
 
 Parameters on the server side:

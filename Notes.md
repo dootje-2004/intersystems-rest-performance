@@ -50,6 +50,12 @@ Info on Makefile syntax [here](https://makefiletutorial.com/).
 Issue `make build` to deploy the demo, `make halt` to remove it.
 Use `make run` to restart the containers without rebuilding.
 
+## Create Dockerfile for the server and client containers
+
+The only thing it needs to do is define the base image and invoke the script `int.sh`.
+Combining all shell commands into one script avoids the creation of multiple layers in the container, and it makes for more readable code.
+Note that we explicitly define the image version; this is preferable to using the *latest* tag, since it avoids unexpected container updates.
+
 ## Configure the server instance
 
 A portable way to do this is through a manifest file.
@@ -61,12 +67,23 @@ On the client, the manifest also creates a namespace called *REST*.
 
 ## Define REST interface in OpenAPI format
 
-Still relies on OpenAPI version 2 (aka Swagger).
+IRIS still relies on OpenAPI version 2 (aka Swagger).
 Make sure to include the client timestamp in the messages.
 Have one of the fields be a stream with adjustable length, so we can vary the size of the messages.
 
-## Create Dockerfile for the client
+## Create the API
 
-## Create Dockerfile for the server
+The initial server's REST API classes can be created in [one of the three ways described in the IRIS documentation](https://docs.intersystems.com/iris20222/csp/docbook/DocBook.UI.Page.cls?KEY=GREST_intro#GREST_intro_create_overview).
+Since we follow the spec-first approach, we create the API by invoking `##class(%REST.API).CreateApplication()`.
 
-## Create server dashboard
+## Implement server-side methods
+
+After creating the API, we need to implement the server-side methods it calls.
+In our case this is just the `processPayload()` method in the implementation class.
+The easiest way to deal with this is to reload the entire `demo.impl` class.
+
+## Expose the API
+
+Create a new web application on the server to allow external clients to send data.
+
+## Create server metrics

@@ -1,15 +1,9 @@
 zn "%SYS"
+write "Disabling authentication"
 set sc = ##class(Security.Users).UnExpireUserPasswords("*")
 set p("PasswordNeverExpires") = 1
 for name="Admin","SuperUser","UnknownUser","_SYSTEM" { do ##class(Security.Users).Modify(name,.p) }
 for name="Admin","SuperUser","UnknownUser","_SYSTEM" { do ##class(Security.Users).AddRoles(name, "%All") }
-kill p
-
-set p("AutheEnabled") = 64
-set statement = ##class(%SQL.Statement).%New()
-set sc = statement.%PrepareClassQuery("Security.Applications", "List")
-set resultset = statement.%Execute()
-while resultset.%Next() { do ##class(Security.Applications).Modify(resultset.%Get("Name"), .p) }
 kill p
 
 write "Creating namespace REST"
@@ -17,6 +11,27 @@ set dir = $system.Util.GetEnviron("INIT_DIR")
 write "Initial directory is ", dir
 do $system.OBJ.Load(dir _ "/Manifest.cls","ck")
 do ##class(REST.Manifest).setup(, 3)
+
+write "Unsecuring web access"
+set p("AutheEnabled") = 64
+set statement = ##class(%SQL.Statement).%New()
+set sc = statement.%PrepareClassQuery("Security.Applications", "List")
+set resultset = statement.%Execute()
+while resultset.%Next() { do ##class(Security.Applications).Modify(resultset.%Get("Name"), .p) }
+kill p
+
+write "Creating REST service"
+zn "DEMO"
+do ##class(%REST.API).CreateApplication("demo", "/home/irisowner/swagger.json",, .newApplication, .internalError)
+do $system.OBJ.Load("/home/irisowner/demo.impl.cls", "ck")
+
+zn "%SYS"
+write "Creating web application"
+set p("AutheEnabled") = 64
+set p("DispatchClass") = "demo.disp"
+set p("InbndWebServicesEnabled") = 1
+set p("NameSpace") = "DEMO"
+do ##class(Security.Applications).Create("/demo",.p)
 
 do INT^JRNSTOP
 kill ^%SYS("JOURNAL")
