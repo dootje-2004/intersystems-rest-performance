@@ -2,7 +2,7 @@
   "swagger": "2.0",
   "info": {
     "title": "InterSystems IRIS REST API ingestion demo",
-    "description": "A simple REST interface to evaluate the ingestion speed of an InterSystems IRIS REST API",
+    "description": "A simple REST interface to evaluate the ingestion speed of an InterSystems IRIS REST API.",
     "contact": {
       "name": "InterSystems Community",
       "url": "https://openexchange.intersystems.com/"

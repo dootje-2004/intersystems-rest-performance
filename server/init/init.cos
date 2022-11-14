@@ -20,10 +20,11 @@ set resultset = statement.%Execute()
 while resultset.%Next() { do ##class(Security.Applications).Modify(resultset.%Get("Name"), .p) }
 kill p
 
-write "Creating REST service"
 zn "DEMO"
+write "Creating REST service"
 do ##class(%REST.API).CreateApplication("demo", "/home/irisowner/swagger.json",, .newApplication, .internalError)
-do $system.OBJ.Load("/home/irisowner/demo.impl.cls", "ck")
+do $system.OBJ.Load(dir _ "/implementation.cls","ck")
+do ##class(demo.implementation).copy("demo.impl")
 
 zn "%SYS"
 write "Creating web application"
@@ -32,6 +33,7 @@ set p("DispatchClass") = "demo.disp"
 set p("InbndWebServicesEnabled") = 1
 set p("NameSpace") = "DEMO"
 do ##class(Security.Applications).Create("/demo",.p)
+kill p
 
 do INT^JRNSTOP
 kill ^%SYS("JOURNAL")
