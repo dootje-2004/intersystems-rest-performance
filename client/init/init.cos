@@ -1,12 +1,12 @@
-zn "%SYS"
 write "Disabling authentication"
+zn "%SYS"
 set sc = ##class(Security.Users).UnExpireUserPasswords("*")
 set p("PasswordNeverExpires") = 1
 for name="Admin","SuperUser","UnknownUser","_SYSTEM" { do ##class(Security.Users).Modify(name,.p) }
 for name="Admin","SuperUser","UnknownUser","_SYSTEM" { do ##class(Security.Users).AddRoles(name, "%All") }
 kill p
 
-write "Creating namespace REST"
+write "Creating namespace DEMO"
 set dir = $system.Util.GetEnviron("INIT_DIR")
 write "Initial directory is ", dir
 do $system.OBJ.Load(dir _ "/Manifest.cls","ck")
@@ -20,6 +20,12 @@ set resultset = statement.%Execute()
 while resultset.%Next() { do ##class(Security.Applications).Modify(resultset.%Get("Name"), .p) }
 kill p
 
+write "Loading classes"
+zn "DEMO"
+do $system.OBJ.LoadDir(dir _ "/demo","ck")
+
+write "Preparing to halt container"
+zn "%SYS"
 do INT^JRNSTOP
 kill ^%SYS("JOURNAL")
 kill ^SYS("NODE")

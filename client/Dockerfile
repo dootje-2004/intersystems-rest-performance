@@ -5,5 +5,5 @@ FROM ${IMAGE}
 USER irisowner
 
 ENV INIT_DIR=/home/irisowner
-COPY --chown=irisowner ./init/* ${INIT_DIR}/
+COPY --chown=irisowner ./init/ ${INIT_DIR}/
 RUN ${INIT_DIR}/init.sh

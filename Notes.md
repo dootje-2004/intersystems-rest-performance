@@ -59,11 +59,7 @@ Note that we explicitly define the image version; this is preferable to using th
 ## Configure the server instance
 
 A portable way to do this is through a manifest file.
-The manifest defines a namespace *REST*.
-
-## Configure the client instance
-
-On the client, the manifest also creates a namespace called *REST*.
+The manifest defines a namespace *DEMO*.
 
 ## Define REST interface in OpenAPI format
 
@@ -85,5 +81,20 @@ The easiest way to deal with this is to reload the entire `demo.impl` class.
 ## Expose the API
 
 Create a new web application on the server to allow external clients to send data.
+
+## Configure the client instance
+
+On the client, the manifest also creates a namespace called *DEMO*.
+We supply class files to create a production *Demo.Production* with
+a request class *Demo.Request* and a business operation *Demo.ClientOperation*.
+
+Note that extending the business operation from *EnsLib.HTTP.OutboundAdapter* allows us to define
+a number of useful settings (like the server name, port number and endpoint), but the adapter
+methods do not allow us to set the content type of the request.
+Instead of `..Adapter.Post()` we leverage a general `%Net.HttpRequest` object.
+
+As for the server and port settings on the client, note that both containers publish their native
+port numbers to the Docker network. The published ports are only relevant to the host.
+The REST calls must be made to the standard web-server port, i.e. 52773.
 
 ## Create server metrics

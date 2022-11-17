@@ -4,7 +4,7 @@ services:
   client:
     build:
       context: ./client
-    container_name: rest-client
+    container_name: democlient
     ports:
       - "9090:52773"
     command: --check-caps false
@@ -12,7 +12,7 @@ services:
   server:
     build:
       context: ./server
-    container_name: rest-server
+    container_name: demoserver
     ports:
       - "9091:52773"
     command: --check-caps false
