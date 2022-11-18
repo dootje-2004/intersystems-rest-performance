@@ -77,10 +77,15 @@ Since we follow the spec-first approach, we create the API by invoking `##class(
 After creating the API, we need to implement the server-side methods it calls.
 In our case this is just the `processPayload()` method in the implementation class.
 The easiest way to deal with this is to reload the entire `demo.impl` class.
+The disadvantage of this approach, however, is that any new `operationId`s in the Swagger spec
+will be overwritten when we reload the entire class.
+To avoid this, we copy the individual methods from the implementation file to `demo.impl`
+with `copyMethods()`.
 
 ## Expose the API
 
 Create a new web application on the server to allow external clients to send data.
+For this, invoke `##class(%REST.API).CreateApplication()`.
 
 ## Configure the client instance
 
@@ -98,3 +103,5 @@ port numbers to the Docker network. The published ports are only relevant to the
 The REST calls must be made to the standard web-server port, i.e. 52773.
 
 ## Create server metrics
+
+TODO: Create metrics

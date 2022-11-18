@@ -4,6 +4,8 @@ Include %occInclude
 Class REST.Manifest
 {
 
+Parameter SourceDir = {$system.Util.GetEnviron("INIT_DIR") _ "/demo"};
+
 XData Manifest [ XMLNamespace = INSTALLER ]
 {
 <Manifest>
@@ -13,6 +15,8 @@ XData Manifest [ XMLNamespace = INSTALLER ]
         <Configuration>
             <Database Name="${NAMESPACE}" Dir="${MGRDIR}/${NAMESPACE}"/>
         </Configuration>
+        <Import File="${#SourceDir}"/>
+        <Production Name="Demo.Production" AutoStart="1"/>
     </Namespace>
     <Log Level="3" Text="End manifest" />
 </Manifest>

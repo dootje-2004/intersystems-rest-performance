@@ -1,18 +1,19 @@
-write "Disabling authentication"
-zn "%SYS"
+; Disable authentication
+znspace "%SYS"
 set sc = ##class(Security.Users).UnExpireUserPasswords("*")
 set p("PasswordNeverExpires") = 1
 for name="Admin","SuperUser","UnknownUser","_SYSTEM" { do ##class(Security.Users).Modify(name,.p) }
 for name="Admin","SuperUser","UnknownUser","_SYSTEM" { do ##class(Security.Users).AddRoles(name, "%All") }
 kill p
 
-write "Creating namespace DEMO"
+; Create DEMO namespace
+znspace "%SYS"
 set dir = $system.Util.GetEnviron("INIT_DIR")
-write "Initial directory is ", dir
 do $system.OBJ.Load(dir _ "/Manifest.cls","ck")
 do ##class(REST.Manifest).setup(, 3)
 
-write "Unsecuring web access"
+; Unsecure web access
+znspace "%SYS"
 set p("AutheEnabled") = 64
 set statement = ##class(%SQL.Statement).%New()
 set sc = statement.%PrepareClassQuery("Security.Applications", "List")
@@ -20,12 +21,8 @@ set resultset = statement.%Execute()
 while resultset.%Next() { do ##class(Security.Applications).Modify(resultset.%Get("Name"), .p) }
 kill p
 
-write "Loading classes"
-zn "DEMO"
-do $system.OBJ.LoadDir(dir _ "/demo","ck")
-
-write "Preparing to halt container"
-zn "%SYS"
+; Prepare to halt container
+znspace "%SYS"
 do INT^JRNSTOP
 kill ^%SYS("JOURNAL")
 kill ^SYS("NODE")

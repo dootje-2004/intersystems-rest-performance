@@ -8,4 +8,4 @@ rm -f $ISC_PACKAGE_INSTALLDIR/mgr/iris.ids
 rm -f $ISC_PACKAGE_INSTALLDIR/mgr/alerts.log
 rm -f $ISC_PACKAGE_INSTALLDIR/mgr/journal/*
 : > $ISC_PACKAGE_INSTALLDIR/mgr/messages.log
-# rm ${INIT_DIR}/init.*
+# rm -fr ${INIT_DIR}/init
