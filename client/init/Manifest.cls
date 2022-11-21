@@ -4,7 +4,7 @@ Include %occInclude
 Class REST.Manifest
 {
 
-Parameter SourceDir = {$system.Util.GetEnviron("INIT_DIR") _ "/demo"};
+Parameter SourceDir = {$system.Util.GetEnviron("INIT_DIR") _ "/src"};
 
 XData Manifest [ XMLNamespace = INSTALLER ]
 {

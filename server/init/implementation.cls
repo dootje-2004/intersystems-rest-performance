@@ -2,15 +2,17 @@ Include %occIO
 
 /// This class contains the methods for the demo's implementation class,
 /// as well as the code to copy them there.
-Class Demo.implementation Extends %REST.Impl
+Class demo.implementation Extends %REST.Impl
 {
 
 /// Processes the payload.
 ClassMethod processPayload(payload As %DynamicObject) As %DynamicObject
 {
+	do payload.%Set("time_received", $zdatetime($ztimestamp, 3, 7, 6))
+	set ^data(payload.%Get("id")) = payload.%ToJSON()
 	do ..%SetContentType("application/json")
 	do ..%SetStatusCode(201)
-	quit {}.%Set("status","OK")
+	quit payload.%Set("time_returned", $zdatetime($ztimestamp, 3, 7, 6))
 }
 
 /// Loops over all methods in this class (with the exception of itself) and copies 
@@ -35,7 +37,7 @@ ClassMethod copyMethods(className As %String) As %Status
 		for {
 			set target = tClass.Methods.GetNext(.targetKey)
 			if targetKey = "" quit
-			// We need to preserve the target method's sequenceNumber.
+			// Preserve the target method's sequenceNumber, or the editor will get confused.
 			set seq = target.SequenceNumber
 			if target.Name = tSource.Name quit
 		}
