@@ -33,3 +33,7 @@ Bug: The `docker-compose.yml` file pointed the server config to the client envir
 *Containers exit immediately after Docker update.*
 See [this post](https://community.intersystems.com/post/using-intersystems-iris-containers-docker-201014).
 Adding `command: --check-caps false` to `docker-compose.yml` fixes it.
+
+*Fractional seconds values in a BP's `<delay>` setting make it zero.*
+This is [the normal behaviour](https://docs.intersystems.com/iris20222/csp/docbook/DocBook.UI.Page.cls?KEY=EBPLR_delay#EBPLR_delay_details).
+As a consequence, we cannot use the `<delay>` action as is.

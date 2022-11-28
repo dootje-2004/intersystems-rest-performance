@@ -10,17 +10,17 @@ kill p
 znspace "%SYS"
 set dir = $system.Util.GetEnviron("INIT_DIR")
 do $system.OBJ.Load(dir _ "/Manifest.cls","ck")
-do ##class(REST.Manifest).setup(, 3)
+do ##class(Demo.Manifest).setup(, 3)
 
 ; Create REST service
 znspace "DEMO"
-do ##class(%REST.API).CreateApplication("demo", dir _ "/swagger.json",, .newApplication, .internalError)
+do ##class(%REST.API).CreateApplication("Demo", dir _ "/swagger.json",, .newApplication, .internalError)
 do $system.OBJ.Load(dir _ "/implementation.cls","ck")
-do ##class(demo.implementation).copyMethods("demo.impl")
+do ##class(Demo.Implementation).CopyMethods("Demo.impl")
 
 ; Create web application
 znspace "%SYS"
-set p("DispatchClass") = "demo.disp"
+set p("DispatchClass") = "Demo.disp"
 set p("InbndWebServicesEnabled") = 1
 set p("NameSpace") = "DEMO"
 do ##class(Security.Applications).Create("/demo",.p)

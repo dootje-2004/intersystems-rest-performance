@@ -1,20 +1,22 @@
 Include %occInclude
 
 /// Simple example of installation instructions (Manifest)
-Class REST.Manifest
+Class Demo.Manifest
 {
+
+Parameter SourceDir = {$system.Util.GetEnviron("INIT_DIR") _ "/src"};
 
 XData Manifest [ XMLNamespace = INSTALLER ]
 {
 <Manifest>
     <Var Name="NAMESPACE" Value="DEMO"/> 
-    <Log Level="3" Text="Start manifest" />
     <Namespace Name="${NAMESPACE}" Code="${NAMESPACE}" Data="${NAMESPACE}">
         <Configuration>
             <Database Name="${NAMESPACE}" Dir="${MGRDIR}/${NAMESPACE}"/>
         </Configuration>
+        <Import File="${#SourceDir}"/>
+        <Production Name="Demo.Production" AutoStart="1"/>
     </Namespace>
-    <Log Level="3" Text="End manifest" />
 </Manifest>
 }
 

@@ -52,7 +52,7 @@
             }
           }
         },
-        "operationId": "processPayload"
+        "operationId": "ProcessPayload"
       }
     }
   },
@@ -64,10 +64,6 @@
           "description": "Unique identifier",
           "type": "integer"
         },
-        "timestamp": {
-          "description": "Client timestamp",
-          "type": "string"
-        },
         "message": {
           "description": "Arbitrary string",
           "type": "string"
@@ -77,15 +73,17 @@
     "StatusObject": {
       "type": "object",
       "properties": {
+        "id": {
+          "description": "Unique identifier",
+          "type": "integer"
+        },
         "status": {
+          "description": "Indicates if message was successfully processed",
           "type": "string",
           "enum": [
             "OK",
             "ERROR"
           ]
-        },
-        "message": {
-          "type": "string"
         }
       }
     }

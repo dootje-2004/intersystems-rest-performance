@@ -1,7 +1,7 @@
 Include %occInclude
 
 /// Simple example of installation instructions (Manifest)
-Class REST.Manifest
+Class Demo.Manifest
 {
 
 Parameter SourceDir = {$system.Util.GetEnviron("INIT_DIR") _ "/src"};
