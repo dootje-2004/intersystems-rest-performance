@@ -2,28 +2,28 @@ Include %occIO
 
 /// This class contains the methods for the demo's implementation class,
 /// as well as the code to copy them there.
-Class Demo.Implementation
+Class Demo.Implementation Extends %REST.Impl
 {
 
 /// Processes the payload.
-ClassMethod ProcessPayload(payload As %DynamicObject) As %DynamicObject
+ClassMethod ProcessRequestBody(payload As %DynamicObject) As %DynamicObject
 {
 	try {
-		do ..%SetHeader("rx-server", ..Timestamp())
+		set t1 = $ztimestamp
 
 		// Forward request in the production.
-		set status = ##class(Ens.Director).CreateBusinessService("Demo.Service", .service)
-		$$$ThrowOnError(status)
-		set status = service.ProcessInput(payload, .out)
-		$$$ThrowOnError(status)
+		set st = ##class(Ens.Director).CreateBusinessService("Demo.Service", .service)
+		$$$ThrowOnError(st)
+		set st = service.ProcessInput(payload, .result)
+		$$$ThrowOnError(st)
 
 		// Compose REST response.
-		set response = {}.%Set("id",payload.%Get("id"))
-		do ..%SetHeader("tx-client", ..%GetHeader("tx-client"))
+		set response = {}.%Set("id",payload.%Get("id")).%Set("size", result)
 		do ..%SetContentType("application/json")
 		do ..%SetStatusCode(201)
 		do response.%Set("status","OK")
-		do ..%SetHeader("tx-server", ..Timestamp())
+		set t2 = $ztimestamp
+		do ..%SetHeader("x-server-time", ($p(t2,",")-$p(t1,","))*86400+$p(t2,",",2)-$p(t1,",",2))
 	} catch ex {
 		set msg = "ERROR | code: " _ ex.Code
 		_ $c(13,10) _ "name: " _ ex.Name
@@ -33,12 +33,6 @@ ClassMethod ProcessPayload(payload As %DynamicObject) As %DynamicObject
 		do response.%Set("status", msg)
 	}
 	return response
-}
-
-/// Returns the current timestamp in microsecond precision.
-ClassMethod Timestamp() As %String
-{
-    return $zdatetime($ztimestamp, 3, 7, 6)
 }
 
 /// Loops over all methods in this class (with the exception of itself) and copies 

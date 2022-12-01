@@ -1,4 +1,4 @@
-Class Demo.Production Extends Ens.Production [ DependsOn = Demo.ClientOperation ]
+Class Demo.Production Extends Ens.Production
 {
 
 XData ProductionDefinition
