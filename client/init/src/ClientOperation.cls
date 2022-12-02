@@ -24,16 +24,15 @@ Method ForwardWithTimestamp(request As Demo.Request, Output response As Demo.Res
     set req.ContentType = "application/json"
      
     set st = request.%JSONExportToStream(req.EntityBody)
-    $$$TRACE("Exporting request to entity body: " _ st)
     if st '= $$$OK return st
     set t1 = $ztimestamp
     set st = req.Post(..Adapter.URL)
-    $$$TRACE("POST status: " _ st)
     if st '= $$$OK return st
     set t2 = $ztimestamp
     
-    // Save metrics.
-    set metric = ##class(Demo.Metrics).%New()
+    // Save measurement.
+    set metric = ##class(Demo.Measurement).%New()
+    set metric.Timestamp = $zdatetime(t1, 3, 1, 6)
     set metric.Id = request.Id
     set metric.ServerTime = req.HttpResponse.GetHeader("x-server-time")
     set metric.NetworkTime = ($p(t2,",")-$p(t1,","))*86400+$p(t2,",",2)-$p(t1,",",2) - metric.ServerTime
@@ -42,7 +41,6 @@ Method ForwardWithTimestamp(request As Demo.Request, Output response As Demo.Res
 
     set resp = req.HttpResponse.Data.Read(, .st)
     if st '= $$$OK return st
-    $$$TRACE("server response: " _ resp)
     set response = ##class(Demo.Response).%New()
     set st = response.%JSONImport(resp)
     quit st

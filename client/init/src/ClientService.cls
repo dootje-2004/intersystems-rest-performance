@@ -1,4 +1,4 @@
-Class Demo.ClientService Extends Ens.BusinessService [ DependsOn = Demo.ClientOperation ]
+Class Demo.ClientService Extends Ens.BusinessService
 {
 
 ClassMethod RunTest(count As %Integer = 1, payloadSize As %Integer = 5) As %Status

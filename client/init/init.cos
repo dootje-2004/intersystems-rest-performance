@@ -21,6 +21,10 @@ set resultset = statement.%Execute()
 while resultset.%Next() { do ##class(Security.Applications).Modify(resultset.%Get("Name"), .p) }
 kill p
 
+; Enable Analytics on the DEMO namespace
+znspace "%SYS"
+set ^SYS("Security", "CSP", "AllowPrefix", "/csp/demo/", "%DeepSee.") = 1
+
 ; Prepare to halt container
 znspace "%SYS"
 do INT^JRNSTOP
