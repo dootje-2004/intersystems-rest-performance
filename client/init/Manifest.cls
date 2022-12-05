@@ -10,7 +10,6 @@ XData Manifest [ XMLNamespace = INSTALLER ]
 {
 <Manifest>
     <Var Name="NAMESPACE" Value="DEMO"/> 
-    <Log Level="3" Text="Start manifest" />
     <Namespace Name="${NAMESPACE}" Code="${NAMESPACE}" Data="${NAMESPACE}">
         <Configuration>
             <Database Name="${NAMESPACE}" Dir="${MGRDIR}/${NAMESPACE}"/>
@@ -18,7 +17,6 @@ XData Manifest [ XMLNamespace = INSTALLER ]
         <Import File="${#SourceDir}"/>
         <Production Name="Demo.Production" AutoStart="1"/>
     </Namespace>
-    <Log Level="3" Text="End manifest" />
 </Manifest>
 }
 

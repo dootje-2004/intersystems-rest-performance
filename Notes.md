@@ -102,6 +102,7 @@ As for the server and port settings on the client, note that both containers pub
 port numbers to the Docker network. The published ports are only relevant to the host.
 The REST calls must be made to the standard web-server port, i.e. 52773.
 
-## Create server metrics
+## Create metrics
 
-TODO: Create metrics
+We register the time the server takes to process each request, as well as the request's overall round-trip time.
+The difference between these values is assumed to be the network delay.
