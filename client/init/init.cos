@@ -12,6 +12,20 @@ set dir = $system.Util.GetEnviron("INIT_DIR")
 do $system.OBJ.Load(dir _ "/Manifest.cls","ck")
 do ##class(Demo.Manifest).setup(, 3)
 
+; Create REST service
+znspace "DEMO"
+do ##class(%REST.API).CreateApplication("Demo", dir _ "/swagger.json",, .newApplication, .internalError)
+do $system.OBJ.Load(dir _ "/implementation.cls","ck")
+do ##class(Demo.Implementation).CopyMethods("Demo.impl")
+
+; Create web application
+znspace "%SYS"
+set p("DispatchClass") = "Demo.disp"
+set p("InbndWebServicesEnabled") = 1
+set p("NameSpace") = "DEMO"
+do ##class(Security.Applications).Create("/demo",.p)
+kill p
+
 ; Unsecure web access
 znspace "%SYS"
 set p("AutheEnabled") = 64

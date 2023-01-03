@@ -2,8 +2,6 @@
 
 ## Open issues
 
-How to change the IRIS default instance name from `IRIS` to `REST CLIENT` or `REST SERVER`?
-
 ## Solved issues
 
 *What type of license is best for the GitHub repository?*
@@ -50,3 +48,15 @@ We need to export the DeepSee item first. This is easiest done through the Manag
 *The client Demo production is not autostarted*
 Turns out there is a `.DS_Store` file in the `/src` directory that is copied into the container.
 Compilation obviously fails, suppressing the subsequent autostart action.
+
+*Custom KPI filter is not programmatically accessible.*
+Solved. Probable reason is the `filterProperty` attribute. If this is missing, the context is not filled.
+Also, this property should refer to an existing field in the KPI's query.
+
+*DeepSee portlets do not support ZenMethods.*
+This is - unfortunately - a feature, not a bug.
+Only Zen pages have a tight binding with the backend, not the individual Zen components.
+
+## Unsolved issues
+
+How to change the IRIS default instance name from `IRIS` to `REST CLIENT` or `REST SERVER`?

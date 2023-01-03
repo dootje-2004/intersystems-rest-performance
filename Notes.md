@@ -106,3 +106,5 @@ The REST calls must be made to the standard web-server port, i.e. 52773.
 
 We register the time the server takes to process each request, as well as the request's overall round-trip time.
 The difference between these values is assumed to be the network delay.
+
+TODO: Split docker-compose into client and server part, in case the demo is run on two different machines.

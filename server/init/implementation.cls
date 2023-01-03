@@ -14,6 +14,7 @@ ClassMethod ProcessRequestBody(payload As %DynamicObject) As %DynamicObject
 		// Forward request in the production.
 		set st = ##class(Ens.Director).CreateBusinessService("Demo.Service", .service)
 		$$$ThrowOnError(st)
+
 		set st = service.ProcessInput(payload, .result)
 		$$$ThrowOnError(st)
 
