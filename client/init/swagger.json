@@ -19,20 +19,23 @@
     "http"
   ],
   "paths": {
-    "/request-count": {
+    "/request/count": {
       "get": {
-        "description": "Returns the number of test requests",
+        "description": "Returns the number of test requests.",
+        "produces": [
+          "text/plain"
+        ],
         "responses": {
           "200": {
-            "description": "Value is returned normally"
+            "description": "Value is returned normally."
           }
         },
         "operationId": "getRequestCount"
       }
     },
-    "/request-count/{count}": {
+    "/request/count/{count}": {
       "put": {
-        "description": "Sets the number of test requests",
+        "description": "Sets the number of test requests.",
         "parameters": [
           {
             "in": "path",
@@ -42,27 +45,30 @@
           }
         ],
         "responses": {
-          "200": {
-            "description": "Value has been set"
+          "204": {
+            "description": "Value has been set."
           }
         },
         "operationId": "setRequestCount"
       }
     },
-    "/request-size": {
+    "/request/size": {
       "get": {
-        "description": "Returns the payload size of a test request",
+        "description": "Returns the payload size of a test request.",
+        "produces": [
+          "text/plain"
+        ],
         "responses": {
           "200": {
-            "description": "Value is returned normally"
+            "description": "Value is returned normally."
           }
         },
         "operationId": "getRequestSize"
       }
     },
-    "/request-size/{size}": {
+    "/request/size/{size}": {
       "put": {
-        "description": "Sets the payload size of each test request",
+        "description": "Sets the payload size of each test request.",
         "parameters": [
           {
             "in": "path",
@@ -72,27 +78,30 @@
           }
         ],
         "responses": {
-          "200": {
-            "description": "Value has been set"
+          "204": {
+            "description": "Value has been set."
           }
         },
         "operationId": "setRequestSize"
       }
     },
-    "/sync-method": {
+    "/syncmethod": {
       "get": {
-        "description": "Returns the synchronization method",
+        "description": "Returns the synchronization method.",
+        "produces": [
+          "text/plain"
+        ],
         "responses": {
           "200": {
-            "description": "Value is returned normally"
+            "description": "Value is returned normally."
           }
         },
         "operationId": "getSyncMethod"
       }
     },
-    "/sync-method/{method}": {
+    "/syncmethod/{method}": {
       "put": {
-        "description": "Sets the synchronization method",
+        "description": "Sets the synchronization method.",
         "parameters": [
           {
             "in": "path",
@@ -102,27 +111,30 @@
           }
         ],
         "responses": {
-          "200": {
-            "description": "Value has been set"
+          "204": {
+            "description": "Value has been set."
           }
         },
         "operationId": "setSyncMethod"
       }
     },
-    "/server-delay": {
+    "/server/delay": {
       "get": {
-        "description": "Returns the server delay (ms)",
+        "description": "Returns the server delay (ms).",
+        "produces": [
+          "text/plain"
+        ],
         "responses": {
           "200": {
-            "description": "Value is returned normally"
+            "description": "Value is returned normally."
           }
         },
         "operationId": "getServerDelay"
       }
     },
-    "/server-delay/{delay}": {
+    "/server/delay/{delay}": {
       "put": {
-        "description": "Sets the server delay (ms)",
+        "description": "Sets the server delay (ms).",
         "parameters": [
           {
             "in": "path",
@@ -132,25 +144,28 @@
           }
         ],
         "responses": {
-          "200": {
-            "description": "Value has been set"
+          "204": {
+            "description": "Value has been set."
           }
         },
         "operationId": "setServerDelay"
       }
     },
-    "/server-poolsize": {
+    "/server/poolsize": {
       "get": {
-        "description": "Returns the poolsize of the server's Business Process",
+        "description": "Returns the poolsize of the server's Business Process.",
+        "produces": [
+          "text/plain"
+        ],
         "responses": {
           "200": {
-            "description": "Value is returned normally"
+            "description": "Value is returned normally."
           }
         },
         "operationId": "getServerPoolsize"
       }
     },
-    "/server-poolsize/{poolsize}": {
+    "/server/poolsize/{poolsize}": {
       "put": {
         "description": "Sets the poolsize of the server's Business Process",
         "parameters": [
@@ -162,11 +177,81 @@
           }
         ],
         "responses": {
-          "200": {
+          "204": {
             "description": "Value has been set"
           }
         },
         "operationId": "setServerPoolsize"
+      }
+    },
+    "/run-test": {
+      "put": {
+        "description": "Initiates a test on the server.",
+        "produces": [
+          "text/plain"
+        ],
+        "responses": {
+          "200": {
+            "description": "Test has been started."
+          }
+        },
+        "operationId": "startTest"
+      }
+    },
+    "/test/status": {
+      "get": {
+        "description": "Returns test status (BUSY or DONE).",
+        "produces": [
+          "text/plain"
+        ],
+        "responses": {
+          "200": {
+            "description": "Status returned normally."
+          }
+        },
+        "operationId": "getTestStatus"
+      }
+    },
+    "/data/series": {
+      "get": {
+        "description": "Returns the time-related data series.",
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "Data returned normally."
+          }
+        },
+        "operationId": "getDataSeries"
+      }
+    },
+    "/data/networktime": {
+      "get": {
+        "description": "Returns the average network time for the test.",
+        "produces": [
+          "text/plain"
+        ],
+        "responses": {
+          "200": {
+            "description": "Value is returned normally."
+          }
+        },
+        "operationId": "getAverageNetworkTime"
+      }
+    },
+    "/data/servertime": {
+      "get": {
+        "description": "Returns the average server processing time for the test.",
+        "produces": [
+          "text/plain"
+        ],
+        "responses": {
+          "200": {
+            "description": "Value is returned normally."
+          }
+        },
+        "operationId": "getAverageServerTime"
       }
     }
   }

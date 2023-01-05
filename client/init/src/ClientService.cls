@@ -1,14 +1,17 @@
 Class Demo.ClientService Extends Ens.BusinessService
 {
 
-ClassMethod RunTest(count As %Integer = 1, payloadSize As %Integer = 5) As %Status
+ClassMethod RunTest() As %Status
 {
     // Remove old measurements.
     &sql(TRUNCATE TABLE Demo.Measurement)
     
+	// Retrieve setttings.
+	&sql(SELECT RequestCount, RequestSize, ServerDelay, ServerPoolSize, SyncMethod INTO :count, :size, :delay, :poolsize, :method FROM Demo.Settings)
+
     // To speed up the test, create the payload once and reuse it for each request.
     set payload = ##class(%Stream.TmpCharacter).%New()
-    for i=1:10:payloadSize {
+    for i=1:10:size {
         set st = payload.Write("REST DEMO ")
         if st '= $$$OK return st
     }
@@ -23,6 +26,7 @@ ClassMethod RunTest(count As %Integer = 1, payloadSize As %Integer = 5) As %Stat
         set st = serv.SendRequestSync("Demo.ClientOperation", req, .resp)
         if st '= $$$OK return st
     }
+    kill ^testrun
     quit st
 }
 

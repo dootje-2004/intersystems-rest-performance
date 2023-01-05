@@ -1,8 +1,62 @@
 <html>
     <head>
-        <title>REST API test page</title>
+        <title>REST API Test</title>
+        <script src="jquery-3.6.3.min.js"></script>
+        <script src="https://code.highcharts.com/highcharts.js"></script>
+        <script src="app.js"></script>
+        <link rel="stylesheet" href="style.css">
+        <link rel="icon" type="image/png" href="api.png">
     </head>
+    <style>
+    </style>
     <body>
-        <h1>REST API Test Page</h1>
-    </body>
+        <h1>REST API Test</h1>
+        <div id="menu" class="float">
+            <div class="menu-item">
+                <label for="request-count">Number of test requests:</label>
+                <input type="number" min="1" id="request-count"/>
+            </div>
+
+            <div class="menu-item">
+                <label for="request-size">Payload size (bytes):</label>
+                <input type="number" min="0" id="request-size"/>
+            </div>
+
+            <div class="menu-item">
+                <label for="server-delay">Server delay (ms):</label>
+                <input type="number" min="0" id="server-delay"/>
+            </div>
+
+            <div class="menu-item">
+                <label for="server-poolsize">Server poolsize:</label>
+                <input type="number" min="1" id="server-poolsize"/>
+            </div>
+
+            <div class="menu-item">
+                <label for="sync-method">Synchronization method:</label>
+                <select id="sync-method">
+                    <option value="Full">Full</option>
+                    <option value="Mixed">Mixed</option>
+                    <option value="None">None</option>
+                </select>
+            </div>
+
+            <div class="menu-item">
+                <button type="button" id="run-button">Run Test</button>
+            </div>
+        </div>
+        <div id="series" class="float">
+            <figure class="highcharts-figure">
+                <div id="chart"></div>
+            </figure>
+        </div>
+        <div id="averages" class="float">
+            <div class="menu-item">
+                Average network time: <span id="data-networktime">-</span> ms
+            </div>
+            <div class="menu-item">
+                Average server time: <span id="data-servertime">-</span> ms
+            </div>    
+        </div>
+</body>
 </html>

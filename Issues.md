@@ -57,6 +57,14 @@ Also, this property should refer to an existing field in the KPI's query.
 This is - unfortunately - a feature, not a bug.
 Only Zen pages have a tight binding with the backend, not the individual Zen components.
 
+*Docker copies entire directory instead of its contents*
+As per the docs, the source directory must end with `/.` for copying the contents only:
+`$ docker cp client/init/html/. rest-demo-client:/usr/irissys/csp/demo`.
+
+*jQuery $.get is not a function*
+The *slim* version of jQuery lacks the Ajax methods *get*, *post* etc.
+Use the normal (minified) version instead.
+
 ## Unsolved issues
 
 How to change the IRIS default instance name from `IRIS` to `REST CLIENT` or `REST SERVER`?
