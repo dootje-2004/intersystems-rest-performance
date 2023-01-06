@@ -110,7 +110,14 @@ ClassMethod setSyncMethod(method As %String) As %String
 /// Returns the server delay (ms).
 ClassMethod getServerDelay() As %Integer
 {
-	&sql(SELECT TOP 1 ServerDelay INTO :delay FROM Demo.Settings)
+	// Get setting from server.
+	set req = ##class(%Net.HttpRequest).%New()
+    set req.Server = ##class(Ens.Director).GetItemSettingValue("Demo.ClientOperation","Adapter","HTTPServer")
+    set req.Port = ##class(Ens.Director).GetItemSettingValue("Demo.ClientOperation","Adapter","HTTPPort")
+    set st = req.Get("/demo/delay")
+	set delay = req.HttpResponse.Data.Read()
+	
+	&sql(UPDATE Demo.Settings SET ServerDelay = :delay)
     do ..%SetStatusCode(200)
     do ..%SetHeader("Content-Type", "text/plain")
     quit delay
@@ -119,16 +126,29 @@ ClassMethod getServerDelay() As %Integer
 /// Sets the server delay (ms).
 ClassMethod setServerDelay(delay As %Integer) As %String
 {
-	// TODO: Propagate delay setting to server production.
 	&sql(UPDATE Demo.Settings SET ServerDelay = :delay)
-    do ..%SetStatusCode(204)
+
+	// Propagate setting to server.
+	set req = ##class(%Net.HttpRequest).%New()
+    set req.Server = ##class(Ens.Director).GetItemSettingValue("Demo.ClientOperation","Adapter","HTTPServer")
+    set req.Port = ##class(Ens.Director).GetItemSettingValue("Demo.ClientOperation","Adapter","HTTPPort")
+    set st = req.Put("/demo/delay/" _ delay)
+    
+	do ..%SetStatusCode(204)
 	quit "OK"
 }
 
 /// Returns the poolsize of the server's Business Process.
 ClassMethod getServerPoolsize() As %Integer
 {
-	&sql(SELECT TOP 1 ServerPoolSize INTO :poolsize FROM Demo.Settings)
+	// Get setting from server.
+	set req = ##class(%Net.HttpRequest).%New()
+    set req.Server = ##class(Ens.Director).GetItemSettingValue("Demo.ClientOperation","Adapter","HTTPServer")
+    set req.Port = ##class(Ens.Director).GetItemSettingValue("Demo.ClientOperation","Adapter","HTTPPort")
+    set st = req.Get("/demo/poolsize")
+	set poolsize = req.HttpResponse.Data.Read()
+	
+	&sql(UPDATE Demo.Settings SET ServerPoolSize = :poolsize)
     do ..%SetStatusCode(200)
     do ..%SetHeader("Content-Type", "text/plain")
     quit poolsize
@@ -137,9 +157,16 @@ ClassMethod getServerPoolsize() As %Integer
 /// Sets the poolsize of the server's Business Process.
 ClassMethod setServerPoolsize(poolsize As %Integer) As %String
 {
-	// TODO: Propagate poolsize setting to server production.
 	&sql(UPDATE Demo.Settings SET ServerPoolSize = :poolsize)
-    do ..%SetStatusCode(204)
+
+	// Propagate setting to server.
+	set req = ##class(%Net.HttpRequest).%New()
+    set req.Server = ##class(Ens.Director).GetItemSettingValue("Demo.ClientOperation","Adapter","HTTPServer")
+    set req.Port = ##class(Ens.Director).GetItemSettingValue("Demo.ClientOperation","Adapter","HTTPPort")
+    set st = req.Put("/demo/poolsize/" _ poolsize)
+    
+	&sql(UPDATE Demo.Settings SET ServerPoolSize = :poolsize)
+	do ..%SetStatusCode(204)
 	quit "OK"
 }
 

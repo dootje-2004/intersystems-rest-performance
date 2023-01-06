@@ -14,14 +14,14 @@
     "version": "0.0.1"
   },
   "host": "localhost:9091",
-  "basePath": "/csp/demo/rest",
+  "basePath": "/demo",
   "schemes": [
     "http"
   ],
   "paths": {
     "/": {
       "post": {
-        "description": "Allows upload of a single item",
+        "description": "Allows upload of a single request.",
         "consumes": [
           "application/json"
         ],
@@ -40,19 +40,79 @@
         ],
         "responses": {
           "201": {
-            "description": "Object has been saved",
-            "schema": {
-              "$ref": "#/definitions/StatusObject"
-            }
+            "description": "Object has been saved"
           },
           "default": {
-            "description": "Unexpected error",
-            "schema": {
-              "$ref": "#/definitions/StatusObject"
-            }
+            "description": "Unexpected error"
           }
         },
         "operationId": "ProcessRequestBody"
+      }
+    },
+    "/delay": {
+      "get": {
+        "description": "Returns the processing delay of the server's Business Process.",
+        "produces": [
+          "text/plain"
+        ],
+        "responses": {
+          "200": {
+            "description": "Value is returned normally."
+          }
+        },
+        "operationId": "getDelay"
+      }
+    },
+    "/delay/{delay}": {
+      "put": {
+        "description": "Sets the processing delay of the server's Business Process.",
+        "parameters": [
+          {
+            "in": "path",
+            "type": "number",
+            "name": "delay",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Value has been set."
+          }
+        },
+        "operationId": "setDelay"
+      }
+    },
+    "/poolsize": {
+      "get": {
+        "description": "Returns the poolsize of the server's Business Process.",
+        "produces": [
+          "text/plain"
+        ],
+        "responses": {
+          "200": {
+            "description": "Value is returned normally."
+          }
+        },
+        "operationId": "getPoolsize"
+      }
+    },
+    "/poolsize/{poolsize}": {
+      "put": {
+        "description": "Sets the poolsize of the server's Business Process.",
+        "parameters": [
+          {
+            "in": "path",
+            "type": "number",
+            "name": "poolsize",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Value has been set."
+          }
+        },
+        "operationId": "setPoolsize"
       }
     }
   },
@@ -67,23 +127,6 @@
         "message": {
           "description": "Arbitrary string",
           "type": "string"
-        }
-      }
-    },
-    "StatusObject": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "description": "Unique identifier",
-          "type": "integer"
-        },
-        "status": {
-          "description": "Indicates if message was successfully processed",
-          "type": "string",
-          "enum": [
-            "OK",
-            "ERROR"
-          ]
         }
       }
     }

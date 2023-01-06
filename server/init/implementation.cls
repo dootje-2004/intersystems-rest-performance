@@ -5,6 +5,56 @@ Include %occIO
 Class Demo.Implementation Extends %REST.Impl
 {
 
+/// Loops over all methods in this class (with the exception of itself) and copies 
+/// them to the class <var>className</var>.
+ClassMethod CopyMethods(className As %String) As %Status
+{
+	set status = $$$OK
+	set sources = ##class(%Dictionary.ClassDefinition).%OpenId($$$CurrentClass).Methods
+	set class = ##class(%Dictionary.ClassDefinition).%OpenId(className)
+	if class = "" quit $system.Status.Error(5351, className)
+
+	// Loop over all methods (sources) is this class.
+	set sourceKey = ""
+	for {
+		set source = sources.GetNext(.sourceKey)
+		
+		if sourceKey = "" quit // We are done looping.
+		if source.Name = $$$CurrentMethod continue // Skip this method.
+
+		// Loop over all methods (targets) in the target class until
+		// we find one with the same name as the current source method.
+		set targetKey = ""
+		for {
+			set target = class.Methods.GetNext(.targetKey)
+			if targetKey = "" quit
+			// Preserve the target method's sequenceNumber, or the IDE editor will get confused.
+			set seq = target.SequenceNumber
+			if target.Name = source.Name quit
+		}
+
+		if targetKey = "" {
+			// The target class does not yet have a method with the source's name, so we append a new method.
+			write "Create new target key ", targetKey,!
+			set targetKey = class.Methods.Count() + 1
+			set seq = targetKey
+		}
+
+		set target = source.%ConstructClone(1) // Deep copy.
+		set target.parent = class
+
+		set target.SequenceNumber = seq // Set or restore the sequence number.
+		set status = class.Methods.SetAt(target, targetKey) // Replace or append the method.
+		if status '= $$$OK quit
+		set status = target.%Save()
+		if status '= $$$OK quit
+	}
+	set status = class.%Save()
+	if status '= $$$OK quit status
+	set status = $system.OBJ.Compile(className)
+	quit status
+}
+
 /// Processes the payload.
 ClassMethod ProcessRequestBody(payload As %DynamicObject) As %DynamicObject
 {
@@ -36,50 +86,44 @@ ClassMethod ProcessRequestBody(payload As %DynamicObject) As %DynamicObject
 	return response
 }
 
-/// Loops over all methods in this class (with the exception of itself) and copies 
-/// them to the class <var>className</var>.
-ClassMethod CopyMethods(className As %String) As %Status
+/// Returns the processing delay of the server's Business Process.
+ClassMethod getDelay() As %Integer
 {
-	set status = $$$OK
-	set sources = ##class(%Dictionary.ClassDefinition).%OpenId($$$CurrentClass).Methods
-	set class = ##class(%Dictionary.ClassDefinition).%OpenId(className)
-	if class = "" quit $system.Status.Error(5351, className)
+	// https://community.intersystems.com/post/getting-production-settings-value
+	set delay = ##class(Ens.Director).GetItemSettingValue("Demo.Process","Host","Delay")
+	do ..%SetStatusCode(200)
+    do ..%SetHeader("Content-Type", "text/plain")
+	return delay
+}
 
-	// Loop over all methods (sources) is this class.
-	set sourceKey = ""
-	for {
-		set source = sources.GetNext(.sourceKey)
-		if sourceKey = "" quit // We are done looping.
-		if source.Name = $$$CurrentMethod continue // Skip this method.
+/// Sets the processing delay of the server's Business Process.
+ClassMethod setDelay(delay As %Integer) As %String
+{
+	set settings("Demo.Process", "Host", "Delay") = delay
+	set st = ##class(Ens.Production).ApplySettings("Demo.Production",.settings)
+	do ..%SetStatusCode(204)
+	return "OK"
+}
 
-		// Loop over all methods (targets) in the target class until
-		// we find one with the same name as the current source method.
-		set targetKey = ""
-		for {
-			set target = class.Methods.GetNext(.targetKey)
-			if targetKey = "" quit
-			// Preserve the target method's sequenceNumber, or the editor will get confused.
-			set seq = target.SequenceNumber
-			if target.Name = source.Name quit
-		}
+/// Returns the poolsize of the server's Business Process.
+ClassMethod getPoolsize() As %Integer
+{
+	set st = ##class(Ens.Config.Item).NameExists("Demo.Production","Demo.Process",.id)
+	set item = ##class(Ens.Config.Item).%OpenId(id)
+	do ..%SetStatusCode(200)
+    do ..%SetHeader("Content-Type", "text/plain")
+  	return item.PoolSize
+}
 
-		if targetKey = "" {
-			// The target class does not yet have a method with the source's name, so we append a new method.
-			set targetKey = class.Methods.Count() + 1
-			set seq = targetKey
-		}
-
-		set target = source.%ConstructClone(1) // Deep copy.
-		set target.SequenceNumber = seq // Set or restore the sequence number.
-		set status = class.Methods.SetAt(target, targetKey) // Replace or append the method.
-		if status '= $$$OK quit
-		set status = target.%Save()
-		if status '= $$$OK quit
-		set status = class.%Save()
-	}
-	if status '= $$$OK quit status
-	set status = $system.OBJ.Compile(className)
-	quit status
+/// Sets the poolsize of the server's Business Process.
+ClassMethod setPoolsize(poolsize As %Integer) As %String
+{
+	set st = ##class(Ens.Config.Item).NameExists("Demo.Production","Demo.Process",.id)
+	set item = ##class(Ens.Config.Item).%OpenId(id)
+	set item.PoolSize = poolsize
+	set st = item.%Save()
+	do ..%SetStatusCode(204)
+	return "OK"
 }
 
 }
