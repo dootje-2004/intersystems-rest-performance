@@ -7,8 +7,6 @@
         <link rel="stylesheet" href="style.css">
         <link rel="icon" type="image/png" href="api.png">
     </head>
-    <style>
-    </style>
     <body>
         <h1>REST API Test</h1>
         <div id="menu" class="float">
@@ -23,22 +21,32 @@
             </div>
 
             <div class="menu-item">
-                <label for="server-delay">Server delay (ms):</label>
+                <label for="server-delay">Business Process delay (ms):</label>
                 <input type="number" min="0" id="server-delay"/>
             </div>
 
             <div class="menu-item">
-                <label for="server-poolsize">Server poolsize:</label>
+                <label for="server-poolsize">Business Process poolsize:</label>
                 <input type="number" min="1" id="server-poolsize"/>
             </div>
 
             <div class="menu-item">
-                <label for="sync-method">Synchronization method:</label>
-                <select id="sync-method">
-                    <option value="Full">Full</option>
-                    <option value="Mixed">Mixed</option>
-                    <option value="None">None</option>
+                <label for="service-sync">Business Service sync:</label>
+                <input type="checkbox" id="service-sync"/>
+            </div>
+
+            <div class="menu-item">
+                <label for="rest-action">REST behaviour:</label>
+                <select id="rest-action">
+                    <option value="SYNC">Forward sync</option>
+                    <option value="ASYNC">Forward async</option>
+                    <option value="STORE">Direct storage</option>
                 </select>
+            </div>
+
+            <div class="menu-item">
+                <label for="client-sync">Client sync:</label>
+                <input type="checkbox" id="client-sync"/>
             </div>
 
             <div class="menu-item">

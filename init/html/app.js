@@ -6,17 +6,24 @@ $(document).ready(function(){
 
     $.get( '/demo/request/count', function(data){ $('#request-count').val(data); }, 'text' );
     $.get( '/demo/request/size', function(data){ $('#request-size').val(data); }, 'text' );
-    $.get( '/demo/server/delay', function(data){ $('#server-delay').val(data); }, 'text' );
-    $.get( '/demo/server/poolsize', function(data){ $('#server-poolsize').val(data); }, 'text' );
-    $.get( '/demo/syncmethod', function(data){ $('#sync-method').val(data); }, 'text' );
+    $.get( '/demo/process/delay', function(data){ $('#server-delay').val(data); }, 'text' );
+    $.get( '/demo/process/poolsize', function(data){ $('#server-poolsize').val(data); }, 'text' );
+    $.get( '/demo/service/sync', function(data){ $('#service-sync').prop('checked',data=='1'); }, 'text' );
+    $.get( '/demo/rest/forward', function(data){ $('#rest-action').val(data); }, 'text' );
+    $.get( '/demo/client/sync', function(data){ $('#client-sync').prop('checked',data=='1'); }, 'text' );
 
     // Behaviors.
     $('#request-count').on( 'change', function(){ $.ajax({ method: 'PUT', url: '/demo/request/count/' + $(this).val() }); });
     $('#request-size').on( 'change', function(){ $.ajax({ method: 'PUT', url: '/demo/request/size/' + $(this).val() }); });
-    $('#server-delay').on( 'change', function(){ $.ajax({ method: 'PUT', url: '/demo/server/delay/' + $(this).val() }); });
-    $('#server-poolsize').on( 'change', function(){ $.ajax({ method: 'PUT', url: '/demo/server/poolsize/' + $(this).val() }); });
-    $('#sync-method').on( 'change', function(){ $.ajax({ method: 'PUT', url: '/demo/syncmethod/' + $(this).val() }); });
+    $('#server-delay').on( 'change', function(){ $.ajax({ method: 'PUT', url: '/demo/process/delay/' + $(this).val() }); });
+    $('#server-poolsize').on( 'change', function(){ $.ajax({ method: 'PUT', url: '/demo/process/poolsize/' + $(this).val() }); });
+    $('#service-sync').on( 'change', function(){ $.ajax({ method: 'PUT', url: '/demo/service/sync/' + ($(this).prop('checked')?'1':'0') }); });
+    $('#rest-action').on( 'change', function(){ $.ajax({ method: 'PUT', url: '/demo/rest/forward/' + $(this).val() }); });
+    $('#client-sync').on( 'change', function(){ $.ajax({ method: 'PUT', url: '/demo/client/sync/' + ($(this).prop('checked')?'1':'0') }); });
     $('#run-button').on('click', function(){
+        runTest();
+        return; // For now.
+
         $(this).prop('disabled', true);
         $.ajax({
             method: 'PUT',
@@ -68,60 +75,64 @@ function refreshDashboard(){
         console.log(data);
 
         // Calculate column width.
-        let columnWidth = $('#chart').width() / 60;
+        let columnWidth = $('#chart').width() * 0.8 / data.id.length;
 
         // Adapted from Highcharts stacked columns demo.
         Highcharts.chart('chart', {
             accessibility: { enabled: false }, // Avoids warning in console.
-            chart: {
-                type: 'column'
-            },
-
-            title: {
-                text: 'Network and server processing times'
-            },
-
+            chart: { type: 'column' },
+            title: { text: 'Network and server processing times' },
             xAxis: {
                 categories: data.id,
-                title: {
-                    text: 'Request ID'
-                }
-            },
-
+                title: { text: 'Request ID' } },
             yAxis: {
                 allowDecimals: true,
                 min: 0,
-                title: {
-                    text: 'Time (ms)'
-                }
+                title: { text: 'Time (ms)' }
             },
-
             tooltip: {
-                formatter: function () {
-                    return '<b>Request' + (this.x.indexOf('-') > -1 ? 's ' : ' ') + this.x + '</b><br/>' +
-                        this.series.name + ': ' + parseFloat(this.y).toFixed(3) + ' ms<br/>' +
-                        'Total: ' + parseFloat(this.point.stackTotal).toFixed(3) + ' ms';
+                formatter: function(){
+                    return '<b>Request' + (this.x.indexOf('-') > -1 ? 's ' : ' ') + this.x + '</b><br/>'
+                    + this.series.name + ': ' + parseFloat(this.y).toFixed(3) + ' ms<br/>'
+                    + 'Total: ' + parseFloat(this.point.stackTotal).toFixed(3) + ' ms';
                 }
             },
-
             plotOptions: {
-                column: {
-                    stacking: 'normal'
-                },
-                series: {
-                    pointWidth: columnWidth
-                }
+                column: { stacking: 'normal' },
+                series: { pointWidth: columnWidth }
             },
-
-            series: [{
-                name: 'serverTime',
-                data: data.serverTime
-            }, {
-                name: 'networkTime',
-                data: data.networkTime
-            }]
+            series: [
+                {
+                    name: 'serverTime',
+                    data: data.serverTime
+                },
+                {
+                    name: 'networkTime',
+                    data: data.networkTime
+                }
+            ]
         });
-
-
     }, 'json' );
 };
+
+function runTest(){
+    let count = $('#request-count').val();
+    let size = $('#request-size').val();
+    let payload = "DEMO DEMO ".repeat(Math.round(size / 10));
+    for (let i = 0; i < count; i++) sendTestMessage('/demo/', { "id": i, "message": payload });
+}
+
+function sendTestMessage(url,body){
+    $.ajax({
+        async: ! $('#client-sync').prop('checked'),
+        contentType: 'application/json',
+        data: JSON.stringify(body),
+        dataType: 'json',
+        headers: { "Accept": "*/*" },
+        method: 'POST',
+        success: function(data){
+            console.log(data);
+        },
+        url: url
+    });
+}

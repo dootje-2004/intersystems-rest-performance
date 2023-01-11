@@ -21,7 +21,11 @@ h1 {
 }
 
 input, select, button {
-    width: 5em;
+    width: 6em;
+}
+
+input[type=text],input[type=number] {
+    text-align: right;
 }
 
 .float {

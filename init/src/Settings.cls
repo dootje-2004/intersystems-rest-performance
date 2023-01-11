@@ -1,15 +1,20 @@
 Class Demo.Settings Extends (%Persistent, %Projection.AbstractProjection)
 {
 
+/// Indicates how the browser calls the API.
+Property ClientSync As %Boolean;
+
+/// Business Process poolsize.
+Property PoolSize As %Integer(MINVAL = 1);
+
+/// Number of test requests.
 Property RequestCount As %Integer(MINVAL = 1);
 
+/// Size (in characters) of each request's payload.
 Property RequestSize As %Integer(MINVAL = 1);
 
-Property ServerDelay As %Integer(MINVAL = 0);
-
-Property ServerPoolSize As %Integer(MINVAL = 1);
-
-Property SyncMethod As %String(VALUELIST = ",Full,Mixed,None");
+/// Indicates how the REST implementation class forwards requests.
+Property RestForwardingMethod As %String(VALUELIST = ",SYNC,ASYNC,STORE");
 
 Projection Populate As Demo.Settings;
 
@@ -18,7 +23,7 @@ ClassMethod CreateProjection(cls As %String, ByRef params) As %Status
     // Fill the table with default values if it is empty.
     &sql(SELECT COUNT(*) INTO :cnt FROM Demo.Settings)
     if (cnt = 0) {
-        &sql(INSERT INTO Demo.Settings(RequestCount, RequestSize, ServerDelay, ServerPoolSize, SyncMethod) VALUES (1, 1000, 3, 1, 'Full'))
+        &sql(INSERT INTO Demo.Settings(ClientSync, PoolSize, RequestCount, RequestSize, RestForwardingMethod) VALUES (1, 1, 100, 1000, 'SYNC'))
     }
     quit $$$OK
 }
@@ -30,19 +35,19 @@ Storage Default
 <Value>%%CLASSNAME</Value>
 </Value>
 <Value name="2">
-<Value>RequestCount</Value>
+<Value>ClientSync</Value>
 </Value>
 <Value name="3">
-<Value>RequestSize</Value>
+<Value>PoolSize</Value>
 </Value>
 <Value name="4">
-<Value>ServerDelay</Value>
+<Value>RequestCount</Value>
 </Value>
 <Value name="5">
-<Value>ServerPoolSize</Value>
+<Value>RequestSize</Value>
 </Value>
 <Value name="6">
-<Value>SyncMethod</Value>
+<Value>RestForwardingMethod</Value>
 </Value>
 </Data>
 <DataLocation>^Demo.SettingsD</DataLocation>

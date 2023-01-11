@@ -3,7 +3,7 @@ Class Demo.Process Extends Ens.BusinessProcessBPL
 {
 
 /// Processing delay in milliseconds.
-Property Delay As %Integer [ InitialExpression = 1 ];
+Property Delay As %Integer [ InitialExpression = 3 ];
 
 Parameter SETTINGS = "Delay:Basic";
 
@@ -19,6 +19,18 @@ XData BPL [ XMLNamespace = "http://www.intersystems.com/bpl" ]
 </code>
 </sequence>
 </process>
+}
+
+Storage Default
+{
+<Data name="ProcessDefaultData">
+<Subscript>"Process"</Subscript>
+<Value name="1">
+<Value>Delay</Value>
+</Value>
+</Data>
+<DefaultData>ProcessDefaultData</DefaultData>
+<Type>%Storage.Persistent</Type>
 }
 
 }

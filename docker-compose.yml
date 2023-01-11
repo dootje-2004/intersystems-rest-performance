@@ -1,23 +1,11 @@
 version: "3"
 
 services:
-  client:
-    build:
-      context: ./client
-    container_name: rest-demo-client
-    hostname: demo-client
-    ports:
-      - "9090:52773"
-    command: --check-caps false
-
   server:
     build:
-      context: ./server
+      context: ./
     container_name: rest-demo-server
     hostname: demo-server
     ports:
-      - "9091:52773"
+      - "9090:52773"
     command: --check-caps false
-
-networks:
-  default:

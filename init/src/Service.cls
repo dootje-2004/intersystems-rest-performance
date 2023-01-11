@@ -1,9 +1,9 @@
 Class Demo.Service Extends Ens.BusinessService
 {
 
-Property Async As %Boolean [ InitialExpression = 1 ];
+Property Sync As %Boolean [ InitialExpression = 1 ];
 
-Parameter SETTINGS = "Async:Basic";
+Parameter SETTINGS = "Sync:Basic";
 
 /// Accepts a dynamic object, forwards it to <class>Demo.Process</class> and returns the length of the payload message.
 /// Forwarding is synchronous or asynchronous, depending on the value of the <property>Async</property> setting.
@@ -15,10 +15,10 @@ Method OnProcessInput(input As %RegisteredObject, Output output As %RegisteredOb
     set request.Message = input.%Get("message",,"stream")
     set output = request.Message.SizeGet()
 
-    if ..Async = 1 {
-        set st = ..SendRequestAsync("Demo.Process", request)
+    if ..Sync = 1 {
+        set st = ..SendRequestSync("Demo.Process", request, .response)
     } else {
-        set st = ..SendRequestSync("Demo.Process", request, .reponse)
+        set st = ..SendRequestAsync("Demo.Process", request)
     }
     quit $$$OK
 }

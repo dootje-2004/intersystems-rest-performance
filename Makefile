@@ -4,5 +4,5 @@ build:
 
 clean:
 	- docker-compose stop
-	- docker rm rest-demo-client rest-demo-server
-	- docker rmi intersystems-rest-demo-client:latest intersystems-rest-demo-server:latest
+	- docker rm rest-demo-server
+	- docker rmi intersystems-rest-demo-server:latest
