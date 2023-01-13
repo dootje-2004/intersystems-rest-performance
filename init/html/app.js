@@ -1,7 +1,7 @@
 var test_id;
 
 $(document).ready(function(){
-    let maxThreads = navigator.hardwareConcurrency || 4;
+    let maxThreads = navigator.hardwareConcurrency || 8;
     $('#server-poolsize').prop('max', maxThreads);
 
     $.get( '/demo/request/count', function(data){ $('#request-count').val(data); }, 'text' );
@@ -22,58 +22,42 @@ $(document).ready(function(){
     $('#client-sync').on( 'change', function(){ $.ajax({ method: 'PUT', url: '/demo/client/sync/' + ($(this).prop('checked')?'1':'0') }); });
     $('#run-button').on('click', function(){
         runTest();
-        return; // For now.
-
-        $(this).prop('disabled', true);
-        $.ajax({
-            method: 'PUT',
-            url: '/demo/run-test',
-            success: function(data, status){
-                console.log('data',data);
-                console.log('status',status);
-            
-                // Polling for test termination.
-                const pollingID = setInterval(function(){
-                    $.ajax({
-                        method: 'GET',
-                        url: '/demo/test/status',
-                        success: function(data){
-                            console.log("Test status:", data);
-                            if (data == "DONE") {
-                                clearInterval(pollingID);
-                                $('#run-button').prop('disabled', false);
-                                refreshDashboard();
-                            }
-                        },
-                        error: function(){
-                            clearInterval(pollingID);
-                            $('#run-button').prop('disabled', false);
-                        },
-                        dataType: 'text',
-                        cache: false
-                    });
-                }, 500);
-            }
-        })
     });
-
-    refreshDashboard();
 });
 
 function refreshDashboard(){
     console.log('Refreshing dashboard');
+            
     // Get data from server.
-    $.get( '/demo/data/networktime', function(data){
-        $('#data-networktime').text(parseFloat(data).toFixed(3));
-    }, 'text' );
-
-    $.get( '/demo/data/servertime', function(data){
-        $('#data-servertime').text(parseFloat(data).toFixed(3));
-    }, 'text' );
-
-    $.get( '/demo/data/series', function(data){
+    $.get( '/demo/data/series/' + $('#request-count').val(), function(data){
         console.log(data);
+        
+        // Convert to durations in milliseconds.
+        let timeBP = subtractArrays( data.bpRespOut, data.bpReqIn );
+        let timeBS = subtractArrays( data.bsRespOut, data.bsReqIn );
+        let timeAPI = subtractArrays( data.apiRespOut, data.apiReqIn );
+        let timeRoundtrip = subtractArrays( clRespIn, clReqOut );
 
+        let timeNet = subtractArrays( timeRoundtrip, timeAPI );
+        timeAPI = subtractArrays( timeAPI, timeBS );
+        timeBS = subtractArrays( timeBS, timeBP );
+
+        // Convert seconds to milliseconds.
+        timeBP = multiplyArray( timeBP, 1000 );
+        timeBS = multiplyArray( timeBS, 1000 );
+        timeAPI = multiplyArray( timeAPI, 1000 );
+        timeNet = multiplyArray( timeNet, 1000 );
+        timeRoundtrip = multiplyArray( timeRoundtrip, 1000 );
+
+        $('#data-roundtriptime').text( avg(timeRoundtrip).toFixed(3) );
+        $('#data-networktime').text( avg(timeNet).toFixed(3) );
+        $('#data-apitime').text( avg(timeAPI).toFixed(3) );
+        $('#data-bstime').text( avg(timeBS).toFixed(3) );
+        $('#data-bptime').text( avg(timeBP).toFixed(3) );
+        let totalTime = clRespIn[ parseInt( $('#request-count').val() ) - 1] - clReqOut[0];
+        $('#data-testtime-total').text( totalTime.toFixed(3) );
+        $('#data-transfer-rate').text( (clReqOut.length / totalTime).toFixed(3) );
+        
         // Calculate column width.
         let columnWidth = $('#chart').width() * 0.8 / data.id.length;
 
@@ -81,7 +65,7 @@ function refreshDashboard(){
         Highcharts.chart('chart', {
             accessibility: { enabled: false }, // Avoids warning in console.
             chart: { type: 'column' },
-            title: { text: 'Network and server processing times' },
+            title: { text: 'Timing' },
             xAxis: {
                 categories: data.id,
                 title: { text: 'Request ID' } },
@@ -103,27 +87,42 @@ function refreshDashboard(){
             },
             series: [
                 {
-                    name: 'serverTime',
-                    data: data.serverTime
+                    name: 'BP',
+                    data: timeBP
                 },
                 {
-                    name: 'networkTime',
-                    data: data.networkTime
+                    name: 'BS',
+                    data: timeBS
+                },
+                {
+                    name: 'API',
+                    data: timeAPI
+                },
+                {
+                    name: 'network',
+                    data: timeNet
                 }
             ]
         });
     }, 'json' );
 };
 
+var clReqOut, clReqIn;
+
 function runTest(){
+    $('#run-button').prop('disabled', true);
     let count = $('#request-count').val();
     let size = $('#request-size').val();
     let payload = "DEMO DEMO ".repeat(Math.round(size / 10));
+    clReqOut = [];
+    clRespIn = [];
     for (let i = 0; i < count; i++) sendTestMessage('/demo/', { "id": i, "message": payload });
 }
 
-function sendTestMessage(url,body){
+function sendTestMessage(url,body,callback){
+    clReqOut[ body.id ] = Date.now() / 1000;
     $.ajax({
+        url: url,
         async: ! $('#client-sync').prop('checked'),
         contentType: 'application/json',
         data: JSON.stringify(body),
@@ -131,8 +130,24 @@ function sendTestMessage(url,body){
         headers: { "Accept": "*/*" },
         method: 'POST',
         success: function(data){
+            clRespIn[data.id] = Date.now() / 1000 ;
             console.log(data);
-        },
-        url: url
+            if ( data.id >= $('#request-count').val() - 1) {
+                refreshDashboard();
+                $('#run-button').prop('disabled', false);
+            }
+        }
     });
+}
+
+function subtractArrays(a,b) {
+    return a.map(function(item, index) { return item - b[index]; });
+}
+
+function multiplyArray(a,m) {
+    return a.map(function(item, index) { return item * m; });
+}
+
+function avg(arr) {
+    return arr.reduce( (a,b)=> a + b, 0) / arr.length || 0;
 }

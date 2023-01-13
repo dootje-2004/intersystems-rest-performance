@@ -63,23 +63,27 @@ ClassMethod CopyMethods(className As %String) As %Status
 ClassMethod processRequest(payload As %DynamicObject) As %DynamicObject
 {
 	try {
-		set t1 = $ztimestamp
+		set id = payload.%Get("id")
+		set ^testdata(id, 2) = $ztimestamp
+		#; set t1 = $ztimestamp
 
 		// Forward request to the production.
 		set st = ##class(Ens.Director).CreateBusinessService("Demo.Service", .service)
 		$$$ThrowOnError(st)
 
 		// TODO: Can this call be made asynchronously? E.g. with  set st = service.ProcessInput(payload)
+		set ^testdata(id, 3) = $ztimestamp
 		set st = service.ProcessInput(payload, .result)
 		$$$ThrowOnError(st)
+		set ^testdata(id, 10) = $ztimestamp
 
 		// Compose REST response.
-		set response = {}.%Set("id",payload.%Get("id")).%Set("size", result)
+		set response = {}.%Set("id", id).%Set("size", result)
 		do ..%SetContentType("application/json")
 		do ..%SetStatusCode(201)
 		do response.%Set("status","OK")
-		set t2 = $ztimestamp
-		do ..%SetHeader("x-server-time", ($p(t2,",")-$p(t1,","))*86400+$p(t2,",",2)-$p(t1,",",2))
+		#; set t2 = $ztimestamp
+		#; do ..%SetHeader("x-server-time", ($p(t2,",")-$p(t1,","))*86400+$p(t2,",",2)-$p(t1,",",2))
 	} catch ex {
 		set msg = "ERROR | code: " _ ex.Code
 		_ $c(13,10) _ "name: " _ ex.Name
@@ -88,6 +92,7 @@ ClassMethod processRequest(payload As %DynamicObject) As %DynamicObject
 		do ..%SetStatusCode(500)
 		do response.%Set("status", msg)
 	}
+	set ^testdata(id, 11) = $ztimestamp
 	return response
 }
 
@@ -216,6 +221,48 @@ ClassMethod setForwardingMethod(method As %String) As %String
 	&sql(UPDATE Demo.Settings SET RestForwardingMethod = :method)
 	do ..PrepareResponse()
 	return "OK"
+}
+
+/// Returns the first N data points of the test.<br/>
+ClassMethod getDataSeries(count As %Integer) As %DynamicObject
+{
+	set data = {}.%Set("id", [])
+	do data.%Set("apiReqIn", [])   // Corresponds to ^testdata(id,2)
+	do data.%Set("apiReqOut", [])  // Corresponds to ^testdata(id,3)
+	do data.%Set("bsReqIn", [])    // Corresponds to ^testdata(id,4)
+	do data.%Set("bsReqOut", [])   // Corresponds to ^testdata(id,5)
+	do data.%Set("bpReqIn", [])    // Corresponds to ^testdata(id,6)
+	do data.%Set("bpRespOut", [])  // Corresponds to ^testdata(id,7)
+	do data.%Set("bsRespIn", [])   // Corresponds to ^testdata(id,8)
+	do data.%Set("bsRespOut", [])  // Corresponds to ^testdata(id,9)
+	do data.%Set("apiRespIn", [])  // Corresponds to ^testdata(id,10)
+	do data.%Set("apiRespOut", []) // Corresponds to ^testdata(id,11)
+
+	if ($d(^testdata) '= 0) {
+		for i=0:1:count-1 {
+			do data.id.%Push(i, "string")
+			do data.apiReqIn.%Push( ..ts2uf( ^testdata(i,2) ), "number")
+			do data.apiReqOut.%Push( ..ts2uf( ^testdata(i,3) ), "number")
+			do data.bsReqIn.%Push( ..ts2uf( ^testdata(i,4) ), "number")
+			do data.bsReqOut.%Push( ..ts2uf( ^testdata(i,5) ), "number")
+			do data.bpReqIn.%Push( ..ts2uf( ^testdata(i,6) ), "number")
+			do data.bpRespOut.%Push( ..ts2uf( ^testdata(i,7) ), "number")
+			do data.bsRespIn.%Push( ..ts2uf( ^testdata(i,8) ), "number")
+			do data.bsRespOut.%Push( ..ts2uf( ^testdata(i,9) ), "number")
+			do data.apiRespIn.%Push( ..ts2uf( ^testdata(i,10) ), "number")
+			do data.apiRespOut.%Push( ..ts2uf( ^testdata(i,11) ), "number")
+		}
+	}
+	do ..%SetHeader("Content-Type", "text/plain")
+	do ..%SetStatusCode(200)
+	return data
+}
+
+/// Returns the Unix epoch with fractional seconds of a $HOROLOG value.
+/// The default precision is 6.
+ClassMethod ts2uf(horolog As %String, precision As %Integer = 6) As %Double
+{
+	return $zdatetime(horolog,-2) _ "." _ $e($p($p(horolog,",",2),".",2),1,precision)
 }
 
 }

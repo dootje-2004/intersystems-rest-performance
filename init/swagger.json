@@ -279,6 +279,28 @@
         },
         "operationId": "setClientSync"
       }
+    },
+    "/data/series/{count}": {
+      "get": {
+        "description": "Returns the first N data points.",
+        "parameters": [
+          {
+            "in": "path",
+            "type": "number",
+            "name": "count",
+            "required": true
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "Data returned normally."
+          }
+        },
+        "operationId": "getDataSeries"
+      }
     }
   },
   "definitions": {

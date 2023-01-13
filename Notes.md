@@ -128,12 +128,17 @@ The events we monitor are:
 
 * **1**: A message is sent from the client's Business Operation.
 * **2**: The message is received by the server's REST implementation class.
-* **3**: The message is received by the server's Business Service.
-* **4**: The message is received by the server's Business Process.
-* **5**: The message has been processed by the server's Business Process.
-* **6**: A response is received by the server's Business Service.
-* **7**: The response is received by the REST implementation class.
-* **8**: The response is received by the client's Business Operation.
+* **3**: The message is forwarded by the REST implementation class.
+* **4**: The message is received by the server's Business Service.
+* **5**: The message is forwarded by the Business Service.
+* **6**: The message is received by the server's Business Process.
+* **7**: The message has been processed by the server's Business Process.
+* **8**: A response is received by the server's Business Service.
+* **9**: The response is forwarded by the Business Service.
+* **10**: The response is received by the REST implementation class.
+* **11**: An HTTP response is sent back to the client by the REST
+  implementation class.
+* **12**: The HTTP response is received by the client's Business Operation.
 
 The modes we test are:
 

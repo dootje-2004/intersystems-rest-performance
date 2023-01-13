@@ -11,41 +11,71 @@
         <h1>REST API Test</h1>
         <div id="menu" class="float">
             <div class="menu-item">
-                <label for="request-count">Number of test requests:</label>
+                <label for="request-count" class="tooltip">
+                    Request count:
+                    <span class="tooltiptext">The number of test requests to send.</span>
+                </label>
                 <input type="number" min="1" id="request-count"/>
             </div>
 
             <div class="menu-item">
-                <label for="request-size">Payload size (bytes):</label>
+                <label for="request-size" class="tooltip">
+                    Payload size:
+                    <span class="tooltiptext">The number of characters in each request's payload.</span>
+                </label>
                 <input type="number" min="0" id="request-size"/>
             </div>
 
             <div class="menu-item">
-                <label for="server-delay">Business Process delay (ms):</label>
+                <label for="server-delay" class="tooltip">
+                    BP delay:
+                    <span class="tooltiptext">Extra delay in the Business Process (in milliseconds) to simulate an additional backend processing load.</span>
+                </label>
                 <input type="number" min="0" id="server-delay"/>
             </div>
 
             <div class="menu-item">
-                <label for="server-poolsize">Business Process poolsize:</label>
+                <label for="server-poolsize" class="tooltip">
+                    BP poolsize:
+                    <span class="tooltiptext">The Business Process poolsize (maximum number of concurrent processes).</span>
+                </label>
                 <input type="number" min="1" id="server-poolsize"/>
             </div>
 
             <div class="menu-item">
-                <label for="service-sync">Business Service sync:</label>
+                <label for="service-sync" class="tooltip">
+                    BS synchronization:
+                    <span class="tooltiptext">If checked, the Business Service waits for the Business Process to respond.</span>
+                </label>
                 <input type="checkbox" id="service-sync"/>
             </div>
 
             <div class="menu-item">
-                <label for="rest-action">REST behaviour:</label>
+                <label for="rest-action" class="tooltip">
+                    REST behaviour:
+                    <span class="tooltiptext">
+                        Sync: Forward messages synchronously (the standard IRIS behaviour)
+                        </br>
+                        Async: Forward message asynchronously (experimental!)
+                        </br>
+                        Store: Store messages directly. Do not invoke the Business Service.
+                    </span>
+                </label>
                 <select id="rest-action">
-                    <option value="SYNC">Forward sync</option>
-                    <option value="ASYNC">Forward async</option>
-                    <option value="STORE">Direct storage</option>
+                    <option value="SYNC">Sync</option>
+                    <option value="ASYNC">Async</option>
+                    <option value="STORE">Store</option>
                 </select>
             </div>
 
             <div class="menu-item">
-                <label for="client-sync">Client sync:</label>
+                <label for="client-sync" class="tooltip">
+                    Client sync:
+                    <span class="tooltiptext">
+                        If checked, the client (this browser window) sends test messages in order,
+                        and waits for each response before sending the next request.
+                    </span>
+                </label>
                 <input type="checkbox" id="client-sync"/>
             </div>
 
@@ -60,11 +90,26 @@
         </div>
         <div id="averages" class="float">
             <div class="menu-item">
+                Average roundtrip time: <span id="data-roundtriptime">-</span> ms
+            </div>
+            <div class="menu-item">
                 Average network time: <span id="data-networktime">-</span> ms
             </div>
             <div class="menu-item">
-                Average server time: <span id="data-servertime">-</span> ms
-            </div>    
+                Average API time: <span id="data-apitime">-</span> ms
+            </div>
+            <div class="menu-item">
+                Average BS time: <span id="data-bstime">-</span> ms
+            </div>
+            <div class="menu-item">
+                Average BP time: <span id="data-bptime">-</span> ms
+            </div>
+            <div class="menu-item">
+                Total test time: <span id="data-testtime-total">-</span> s
+            </div>
+            <div class="menu-item">
+                Transfer rate: <span id="data-transfer-rate">-</span> s<sup>-1</sup>
+            </div>
         </div>
 </body>
 </html>
