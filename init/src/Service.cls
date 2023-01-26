@@ -21,7 +21,6 @@ Method OnProcessInput(input As %RegisteredObject, Output output As %RegisteredOb
         set ^testdata(input.id, 8) = $ztimestamp
     } else {
         set st = ..SendRequestAsync("Demo.Process", request)
-        set ^testdata(input.id, 8) = ""
     }
     set output = request.Message.SizeGet()
     set ^testdata(input.id, 9) = $ztimestamp

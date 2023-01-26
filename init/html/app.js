@@ -27,9 +27,9 @@ $(document).ready(function(){
 
 function refreshDashboard(){
     console.log('Refreshing dashboard');
-            
+    
     // Get data from server.
-    $.get( '/demo/data/series/' + $('#request-count').val(), function(data){
+    $.get( '/demo/data', function(data){
         console.log(data);
         
         // Convert to durations in milliseconds.
@@ -116,7 +116,16 @@ function runTest(){
     let payload = "DEMO DEMO ".repeat(Math.round(size / 10));
     clReqOut = [];
     clRespIn = [];
-    for (let i = 0; i < count; i++) sendTestMessage('/demo/', { "id": i, "message": payload });
+    responseCount = 0;
+    // Signal to the server that we are initiating a new test run.
+    $.ajax({
+        url: '/demo/data',
+        async: false,
+        method: 'DELETE',
+        success: function(){
+            for (let i = 0; i < count; i++) sendTestMessage('/demo/', { "id": i, "message": payload });
+        }
+    });
 }
 
 function sendTestMessage(url,body,callback){
@@ -130,9 +139,10 @@ function sendTestMessage(url,body,callback){
         headers: { "Accept": "*/*" },
         method: 'POST',
         success: function(data){
+            responseCount++;
             clRespIn[data.id] = Date.now() / 1000 ;
             console.log(data);
-            if ( data.id >= $('#request-count').val() - 1) {
+            if ( responseCount == $('#request-count').val() ) {
                 refreshDashboard();
                 $('#run-button').prop('disabled', false);
             }

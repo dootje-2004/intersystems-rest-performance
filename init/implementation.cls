@@ -65,35 +65,59 @@ ClassMethod processRequest(payload As %DynamicObject) As %DynamicObject
 	try {
 		set id = payload.%Get("id")
 		set ^testdata(id, 2) = $ztimestamp
-		#; set t1 = $ztimestamp
+		set ^testdata(id, 0) = id // Allows for more uniform data handling.
 
-		// Forward request to the production.
-		set st = ##class(Ens.Director).CreateBusinessService("Demo.Service", .service)
-		$$$ThrowOnError(st)
+		&sql(SELECT TOP 1 RestForwardingMethod INTO :fwdMethod FROM Demo.Settings)
 
-		// TODO: Can this call be made asynchronously? E.g. with  set st = service.ProcessInput(payload)
-		set ^testdata(id, 3) = $ztimestamp
-		set st = service.ProcessInput(payload, .result)
-		$$$ThrowOnError(st)
-		set ^testdata(id, 10) = $ztimestamp
+		if fwdMethod = "STORE" {
+			// Store message without sending it to the production.
+    		set msg = payload.%Get("message",,"stream")
+			&sql(INSERT INTO Demo.Message(Id, Payload) VALUES(:id,:msg))
+			set result = msg.SizeGet()
+		} else {
+			// Forward request to the production.
+			set st = ##class(Ens.Director).CreateBusinessService("Demo.Service", .service)
+			$$$ThrowOnError(st)
+			set ^testdata(id, 3) = $ztimestamp
+			
+			if fwdMethod = "SYNC" {
+				set st = service.ProcessInput(payload, .result)
+				$$$ThrowOnError(st)
+				set ^testdata(id, 10) = $ztimestamp
+			} elseif fwdMethod = "ASYNC" {
+				// TODO: Can this call be made asynchronously at all? E.g. with  set st = service.ProcessInput(payload)
+				job ..CallServiceAsync(service, payload)
+				set result = payload.%Get("message",,"stream").SizeGet()
+			} else {
+				// Throw exception: unknown forwarding method.
+				throw ##class(%Exception.StatusException).%New("Unknown option: %1",,,$lb(fwdMethod))
+			}
+		}
 
 		// Compose REST response.
 		set response = {}.%Set("id", id).%Set("size", result)
-		do ..%SetContentType("application/json")
-		do ..%SetStatusCode(201)
+		do ..PrepareResponse("json", 201)
 		do response.%Set("status","OK")
-		#; set t2 = $ztimestamp
-		#; do ..%SetHeader("x-server-time", ($p(t2,",")-$p(t1,","))*86400+$p(t2,",",2)-$p(t1,",",2))
 	} catch ex {
 		set msg = "ERROR | code: " _ ex.Code
 		_ $c(13,10) _ "name: " _ ex.Name
 		_ $c(13,10) _ "location: " _ ex.Location
 		_ $c(13,10) _ "data: " _ ex.Data
-		do ..%SetStatusCode(500)
+		do ..PrepareResponse( , 500)
 		do response.%Set("status", msg)
 	}
 	set ^testdata(id, 11) = $ztimestamp
 	return response
+}
+
+/// Jobs off the call to a Business Service to simulate asynchronous calling.
+/// The calls <var>result</var> argument is simply ignored.
+ClassMethod CallServiceAsync(service As Ens.BusinessService, payload As %DynamicObject) As %Status
+{
+	set st = service.ProcessInput(payload, .result)
+	$$$ThrowOnError(st)
+	/// TODO: Uniform behavior: either "return" or "quit".
+	quit $$$OK
 }
 
 /// Returns the number of test requests.
@@ -183,10 +207,10 @@ ClassMethod setPoolsize(poolsize As %Integer) As %String
 }
 
 /// Sets the response's content type and statuscode.
-ClassMethod PrepareResponse() As %Status
+ClassMethod PrepareResponse(mimeType As %String = "text", statusCode As %Integer = 200) As %Status
 {
-    do ..%SetHeader("Content-Type", "text/plain")
-	do ..%SetStatusCode(200)
+    do ..%SetHeader("Content-Type", $case(mimeType,"json":"application/json",:"text/plain"))
+	do ..%SetStatusCode(statusCode)
 	return $$$OK
 }
 
@@ -219,47 +243,73 @@ ClassMethod getForwardingMethod() As %String
 ClassMethod setForwardingMethod(method As %String) As %String
 {
 	&sql(UPDATE Demo.Settings SET RestForwardingMethod = :method)
+	if SQLCODE = 0 {
+		do ..PrepareResponse()
+		return "OK"
+	} else {
+		// TODO: Decent error message.
+		do ..PrepareResponse( , 400)
+		return "ERROR. SQLCODE = " _ SQLCODE
+	}
+}
+
+/// Removes all data points.
+ClassMethod deleteData() As %DynamicObject
+{
+	kill ^testdata
+	&sql(TRUNCATE TABLE Demo.Message)
 	do ..PrepareResponse()
 	return "OK"
 }
 
-/// Returns the first N data points of the test.<br/>
-ClassMethod getDataSeries(count As %Integer) As %DynamicObject
+/// Returns all data points.
+ClassMethod getData() As %DynamicObject
 {
-	set data = {}.%Set("id", [])
-	do data.%Set("apiReqIn", [])   // Corresponds to ^testdata(id,2)
-	do data.%Set("apiReqOut", [])  // Corresponds to ^testdata(id,3)
-	do data.%Set("bsReqIn", [])    // Corresponds to ^testdata(id,4)
-	do data.%Set("bsReqOut", [])   // Corresponds to ^testdata(id,5)
-	do data.%Set("bpReqIn", [])    // Corresponds to ^testdata(id,6)
-	do data.%Set("bpRespOut", [])  // Corresponds to ^testdata(id,7)
-	do data.%Set("bsRespIn", [])   // Corresponds to ^testdata(id,8)
-	do data.%Set("bsRespOut", [])  // Corresponds to ^testdata(id,9)
-	do data.%Set("apiRespIn", [])  // Corresponds to ^testdata(id,10)
-	do data.%Set("apiRespOut", []) // Corresponds to ^testdata(id,11)
+	set data = {}
+	
+	do ..AddDataSeries(.data, "id", 0, "string")
+	do ..AddDataSeries(.data, "apiReqIn", 2,, "ts2uf")
+	do ..AddDataSeries(.data, "apiReqOut", 3,, "ts2uf")
+	do ..AddDataSeries(.data, "bsReqIn", 4,, "ts2uf")
+	do ..AddDataSeries(.data, "bsReqOut", 5,, "ts2uf")
+	do ..AddDataSeries(.data, "bpReqIn", 6,, "ts2uf")
+	do ..AddDataSeries(.data, "bpRespOut", 7,, "ts2uf")
+	do ..AddDataSeries(.data, "bsRespIn", 8,, "ts2uf")
+	do ..AddDataSeries(.data, "bsRespOut", 9,, "ts2uf")
+	do ..AddDataSeries(.data, "apiRespIn", 10,, "ts2uf")
+	do ..AddDataSeries(.data, "apiRespOut", 11,, "ts2uf")
 
-	if ($d(^testdata) '= 0) {
-		for i=0:1:count-1 {
-			do data.id.%Push(i, "string")
-			do data.apiReqIn.%Push( ..ts2uf( ^testdata(i,2) ), "number")
-			do data.apiReqOut.%Push( ..ts2uf( ^testdata(i,3) ), "number")
-			do data.bsReqIn.%Push( ..ts2uf( ^testdata(i,4) ), "number")
-			do data.bsReqOut.%Push( ..ts2uf( ^testdata(i,5) ), "number")
-			do data.bpReqIn.%Push( ..ts2uf( ^testdata(i,6) ), "number")
-			do data.bpRespOut.%Push( ..ts2uf( ^testdata(i,7) ), "number")
-			do data.bsRespIn.%Push( ..ts2uf( ^testdata(i,8) ), "number")
-			do data.bsRespOut.%Push( ..ts2uf( ^testdata(i,9) ), "number")
-			do data.apiRespIn.%Push( ..ts2uf( ^testdata(i,10) ), "number")
-			do data.apiRespOut.%Push( ..ts2uf( ^testdata(i,11) ), "number")
-		}
-	}
-	do ..%SetHeader("Content-Type", "text/plain")
-	do ..%SetStatusCode(200)
+	do ..PrepareResponse("json")
 	return data
 }
 
+/// Copies the measured series with index <var>tdIndex</var> from the <pre>^testdata</pre> global into an array named <var>dataObject</var>.<var>seriesName</var>.
+/// The array values have JSON datatype <var>dataType</var>.
+/// Before appending a measurement to the array, the method <var>func</var> is executed on the measured value.
+/// This can be used for formatting the output. The method must accept the measured value as its first argument.
+/// If the method is part of the current class, its name can be provided without prefix, with the <pre>..</pre> prefix, or with the full package name.
+ClassMethod AddDataSeries(ByRef dataObject As %DynamicObject, seriesName As %String, tdIndex As %Integer, dataType As %String = "number", func As %String = "") As %Status
+{
+	do dataObject.%Set( seriesName, [] )
+	
+	set cls = $piece( func, ".", 1, *-1 )
+	if (cls = "") || (cls = ".") set cls = $classname()
+	set mtd = $piece( func, ".", * )
+
+	for key = 0:1:$order(^testdata(""),-1) {
+		if $data( ^testdata( key, tdIndex) ) '= 0 {
+			if func = "" {
+				do dataObject.%Get(seriesName).%Push( ^testdata( key, tdIndex), dataType )
+			} else {
+				do dataObject.%Get(seriesName).%Push( $classmethod( cls, mtd, ^testdata( key, tdIndex) ), dataType )
+			}
+		}
+	}
+	quit $$$OK
+}
+
 /// Returns the Unix epoch with fractional seconds of a $HOROLOG value.
-/// The default precision is 6.
+/// The default precision is 6 decimals, i.e. microseconds.
 ClassMethod ts2uf(horolog As %String, precision As %Integer = 6) As %Double
 {
 	return $zdatetime(horolog,-2) _ "." _ $e($p($p(horolog,",",2),".",2),1,precision)

@@ -280,17 +280,9 @@
         "operationId": "setClientSync"
       }
     },
-    "/data/series/{count}": {
+    "/data": {
       "get": {
-        "description": "Returns the first N data points.",
-        "parameters": [
-          {
-            "in": "path",
-            "type": "number",
-            "name": "count",
-            "required": true
-          }
-        ],
+        "description": "Returns all data points.",
         "produces": [
           "application/json"
         ],
@@ -299,7 +291,19 @@
             "description": "Data returned normally."
           }
         },
-        "operationId": "getDataSeries"
+        "operationId": "getData"
+      },
+      "delete": {
+        "description": "Removes all data points.",
+        "produces": [
+          "text/plain"
+        ],
+        "responses": {
+          "200": {
+            "description": "Data removed."
+          }
+        },
+        "operationId": "deleteData"
       }
     }
   },

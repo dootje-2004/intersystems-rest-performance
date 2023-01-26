@@ -188,3 +188,5 @@ TODO: Server BP must store and then delete each message.
 
 In general, we can't assume the client and server clocks to run in sync.
 This is especially true when running the tests on separate machines.
+
+TODO: Make drawing in UI to show data flow.
