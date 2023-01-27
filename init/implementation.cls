@@ -76,17 +76,18 @@ ClassMethod processRequest(payload As %DynamicObject) As %DynamicObject
 			set result = msg.SizeGet()
 		} else {
 			// Forward request to the production.
-			set st = ##class(Ens.Director).CreateBusinessService("Demo.Service", .service)
-			$$$ThrowOnError(st)
 			set ^testdata(id, 3) = $ztimestamp
 			
 			if fwdMethod = "SYNC" {
+				// The standard way.
+				set st = ##class(Ens.Director).CreateBusinessService("Demo.Service", .service)
+				$$$ThrowOnError(st)
 				set st = service.ProcessInput(payload, .result)
 				$$$ThrowOnError(st)
 				set ^testdata(id, 10) = $ztimestamp
 			} elseif fwdMethod = "ASYNC" {
-				// TODO: Can this call be made asynchronously at all? E.g. with  set st = service.ProcessInput(payload)
-				job ..CallServiceAsync(service, payload)
+				// Job off the insertion into the production and ignore Business Service's response.
+				job ..CallServiceAsync(payload)
 				set result = payload.%Get("message",,"stream").SizeGet()
 			} else {
 				// Throw exception: unknown forwarding method.
@@ -112,8 +113,10 @@ ClassMethod processRequest(payload As %DynamicObject) As %DynamicObject
 
 /// Jobs off the call to a Business Service to simulate asynchronous calling.
 /// The calls <var>result</var> argument is simply ignored.
-ClassMethod CallServiceAsync(service As Ens.BusinessService, payload As %DynamicObject) As %Status
+ClassMethod CallServiceAsync(payload As %DynamicObject) As %Status
 {
+	set st = ##class(Ens.Director).CreateBusinessService("Demo.Service", .service)
+	$$$ThrowOnError(st)
 	set st = service.ProcessInput(payload, .result)
 	$$$ThrowOnError(st)
 	/// TODO: Uniform behavior: either "return" or "quit".

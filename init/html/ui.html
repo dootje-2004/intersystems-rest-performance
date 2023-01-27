@@ -44,24 +44,24 @@
 
             <div class="menu-item">
                 <label for="service-sync" class="tooltip">
-                    BS synchronization:
+                    BS sync:
                     <span class="tooltiptext">If checked, the Business Service waits for the Business Process to respond.</span>
                 </label>
                 <input type="checkbox" id="service-sync"/>
             </div>
 
             <div class="menu-item">
-                <label for="rest-action" class="tooltip">
+                <label for="api-action" class="tooltip">
                     REST behaviour:
                     <span class="tooltiptext">
-                        Sync: Forward messages synchronously (the standard IRIS behaviour)
+                        Sync: Forward messages and wait for each response.
                         </br>
-                        Async: Forward message asynchronously (experimental!)
+                        Async: Forward message, ignore the response.
                         </br>
-                        Store: Store messages directly. Do not invoke the Business Service.
+                        Store: Store messages directly, do not invoke the Business Service.
                     </span>
                 </label>
-                <select id="rest-action">
+                <select id="api-action">
                     <option value="SYNC">Sync</option>
                     <option value="ASYNC">Async</option>
                     <option value="STORE">Store</option>
@@ -82,7 +82,56 @@
             <div class="menu-item">
                 <button type="button" id="run-button">Run Test</button>
             </div>
+
+            <svg width="500" height="400">
+                <defs>
+                    <marker id="arrowhead" markerWidth="5" markerHeight="3.5" refX="0" refY="1.75" orient="auto">
+                        <polygon points="0 0, 5 1.75, 0 3.5" fill="#00F"/>
+                    </marker>
+                </defs> 
+                <!-- Client -->
+                <rect x="10" y="10" rx="20" ry="20" width="120" height="300"
+                style="fill:red;stroke:black;stroke-width:5;opacity:0.5"/>
+                <text x="20" y="30">client</text>
+                <!-- Server -->
+                <rect x="160" y="10" rx="20" ry="20" width="240" height="300"
+                style="fill:red;stroke:black;stroke-width:5;opacity:0.5"/>
+                <text x="170" y="30">server</text>
+                <!-- Database -->
+                <rect x="160" y="320" rx="20" ry="20" width="240" height="50"
+                style="fill:red;stroke:black;stroke-width:5;opacity:0.5"/>
+                <text x="170" y="340">database</text>
+                <!-- API -->
+                <rect x="180" y="30" rx="20" ry="20" width="40" height="260"
+                style="fill:red;stroke:black;stroke-width:5;opacity:0.5"/>
+                <text x="190" y="50">API</text>
+                <!-- Business Service -->
+                <rect x="260" y="30" rx="20" ry="20" width="40" height="260"
+                style="fill:red;stroke:black;stroke-width:5;opacity:0.5"/>
+                <text x="270" y="50">BS</text>
+                <!-- Business Process -->
+                <rect x="340" y="30" rx="20" ry="20" width="40" height="260"
+                style="fill:red;stroke:black;stroke-width:5;opacity:0.5"/>
+                <text x="350" y="50">BP</text>
+                <!-- Arrow from client to API -->
+                <line x1="100" y1="50" x2="160" y2="50" stroke="#00F" stroke-width="8" marker-end="url(#arrowhead)" />
+                <!-- Arrow from API to Business Service -->
+                <line x1="200" y1="80" x2="240" y2="80" stroke="#00F" stroke-width="8" marker-end="url(#arrowhead)" id="arrow-api-bs"/>
+                <!-- Arrow from Business Service to Business Process -->
+                <line x1="280" y1="110" x2="320" y2="110" stroke="#00F" stroke-width="8" marker-end="url(#arrowhead)" id="arrow-bs-bp"/>
+                <!-- Arrow from Business Process to Business Service -->
+                <line x1="360" y1="140" x2="320" y2="140" stroke="#00F" stroke-width="8" marker-end="url(#arrowhead)" id="arrow-bp-bs"/>
+                <!-- Arrow from Business Service to API -->
+                <line x1="280" y1="170" x2="240" y2="170" stroke="#00F" stroke-width="8" marker-end="url(#arrowhead)" id="arrow-bs-api"/>
+                <!-- Arrow from API to client -->
+                <line x1="200" y1="200" x2="140" y2="200" stroke="#00F" stroke-width="8" marker-end="url(#arrowhead)" />
+                <!-- Arrow from API to database -->
+                <line x1="200" y1="240" x2="200" y2="300" stroke="#00F" stroke-width="8" marker-end="url(#arrowhead)" id="arrow-api-db"/>
+                <!-- Arrow from Business Process to database -->
+                <line x1="360" y1="240" x2="360" y2="300" stroke="#00F" stroke-width="8" marker-end="url(#arrowhead)" id="arrow-bp-db"/>
+            </svg>
         </div>
+
         <div id="series" class="float">
             <figure class="highcharts-figure">
                 <div id="chart"></div>

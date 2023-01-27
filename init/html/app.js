@@ -8,18 +8,36 @@ $(document).ready(function(){
     $.get( '/demo/request/size', function(data){ $('#request-size').val(data); }, 'text' );
     $.get( '/demo/process/delay', function(data){ $('#server-delay').val(data); }, 'text' );
     $.get( '/demo/process/poolsize', function(data){ $('#server-poolsize').val(data); }, 'text' );
-    $.get( '/demo/service/sync', function(data){ $('#service-sync').prop('checked',data=='1'); }, 'text' );
-    $.get( '/demo/rest/forward', function(data){ $('#rest-action').val(data); }, 'text' );
-    $.get( '/demo/client/sync', function(data){ $('#client-sync').prop('checked',data=='1'); }, 'text' );
+    $.get( '/demo/service/sync', function(data){ 
+        $('#service-sync').prop('checked',data=='1'); 
+        updateArrows();
+    }, 'text' );
+    $.get( '/demo/rest/forward', function(data){ 
+        $('#api-action').val(data); 
+        updateArrows();
+    }, 'text' );
+    $.get( '/demo/client/sync', function(data){ 
+        $('#client-sync').prop('checked',data=='1'); 
+        updateArrows();
+    }, 'text' );
 
     // Behaviors.
     $('#request-count').on( 'change', function(){ $.ajax({ method: 'PUT', url: '/demo/request/count/' + $(this).val() }); });
     $('#request-size').on( 'change', function(){ $.ajax({ method: 'PUT', url: '/demo/request/size/' + $(this).val() }); });
     $('#server-delay').on( 'change', function(){ $.ajax({ method: 'PUT', url: '/demo/process/delay/' + $(this).val() }); });
     $('#server-poolsize').on( 'change', function(){ $.ajax({ method: 'PUT', url: '/demo/process/poolsize/' + $(this).val() }); });
-    $('#service-sync').on( 'change', function(){ $.ajax({ method: 'PUT', url: '/demo/service/sync/' + ($(this).prop('checked')?'1':'0') }); });
-    $('#rest-action').on( 'change', function(){ $.ajax({ method: 'PUT', url: '/demo/rest/forward/' + $(this).val() }); });
-    $('#client-sync').on( 'change', function(){ $.ajax({ method: 'PUT', url: '/demo/client/sync/' + ($(this).prop('checked')?'1':'0') }); });
+    $('#service-sync').on( 'change', function(){ 
+        $.ajax({ method: 'PUT', url: '/demo/service/sync/' + ($(this).prop('checked')?'1':'0') }); 
+        updateArrows();
+    });
+    $('#api-action').on( 'change', function(){ $.ajax({ 
+        method: 'PUT', url: '/demo/rest/forward/' + $(this).val() }); 
+        updateArrows();
+    });
+    $('#client-sync').on( 'change', function(){ $.ajax({ 
+        method: 'PUT', url: '/demo/client/sync/' + ($(this).prop('checked')?'1':'0') }); 
+        updateArrows();
+    });
     $('#run-button').on('click', function(){
         runTest();
     });
@@ -160,4 +178,38 @@ function multiplyArray(a,m) {
 
 function avg(arr) {
     return arr.reduce( (a,b)=> a + b, 0) / arr.length || 0;
+}
+
+function updateArrows() {
+    
+    if ( $('#api-action').val() == 'SYNC' ) {
+        $('#arrow-api-bs').css('visibility','visible');
+        $('#arrow-bs-api').css('visibility','visible');
+        $('#arrow-api-db').css('visibility','hidden');
+        $('#arrow-bp-db').css('visibility','visible');
+        $('#arrow-bs-bp').css('visibility','visible');
+        if ( $('#service-sync').prop('checked') ) {
+            $('#arrow-bp-bs').css('visibility','visible');
+        } else {
+            $('#arrow-bp-bs').css('visibility','hidden');
+        }
+    } else if ( $('#api-action').val() == 'ASYNC' ) {
+        $('#arrow-api-bs').css('visibility','visible');
+        $('#arrow-bs-api').css('visibility','hidden');
+        $('#arrow-api-db').css('visibility','hidden');
+        $('#arrow-bp-db').css('visibility','visible');
+        $('#arrow-bs-bp').css('visibility','visible');
+        if ( $('#service-sync').prop('checked') ) {
+            $('#arrow-bp-bs').css('visibility','visible');
+        } else {
+            $('#arrow-bp-bs').css('visibility','hidden');
+        }
+    } else {
+        $('#arrow-api-bs').css('visibility','hidden');
+        $('#arrow-bs-api').css('visibility','hidden');
+        $('#arrow-api-db').css('visibility','visible');
+        $('#arrow-bp-db').css('visibility','hidden');
+        $('#arrow-bs-bp').css('visibility','hidden');
+        $('#arrow-bp-bs').css('visibility','hidden');
+    }
 }
