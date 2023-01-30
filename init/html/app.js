@@ -212,4 +212,10 @@ function updateArrows() {
         $('#arrow-bs-bp').css('visibility','hidden');
         $('#arrow-bp-bs').css('visibility','hidden');
     }
+    
+    if ( $('#client-sync').prop('checked')) {
+        $('#arrow-api-client').css('opacity','1');
+    } else {
+        $('#arrow-api-client').css('opacity','.4');
+    }
 }
