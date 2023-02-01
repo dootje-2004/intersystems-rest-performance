@@ -176,11 +176,27 @@ The modes we test are:
   This mode can be combined with any of the three previous ones,
   but is only relevant when combined with the fastest, i.e. direct storage.
 
-TODO: Server BP must store and then delete each message.
-
 ## Timing
 
 In general, we can't assume the client and server clocks to run in sync.
 This is especially true when running the tests on separate machines.
 
-TODO: Make drawing in UI to show data flow.
+## Research
+
+TODO: What influence does the network (actually the socket) have?
+What speeds does it support?
+
+TODO: Difference between Docker and bare-metal (e.g. network speed)?
+
+TODO: ZPM package for bare-metal install.
+
+TODO: Compare scenarios two by two (instead of collecting test results for comparison).
+
+TODO: Database expansion: determine and set size
+before starting a test to eliminate overhead.
+
+TODO: Influence of how streams are handled as compared to strings.
+
+TODO: Influence of stream compression.
+%Stream.GlobalCharacter property met parameter COMPRESS = -1.
+See [here](https://docs.intersystems.com/iris20222/csp/documatic/%25CSP.Documatic.cls?LIBRARY=%25SYS&PRIVATE=1&CLASSNAME=%25Stream.GlobalCharacter).

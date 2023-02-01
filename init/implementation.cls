@@ -64,8 +64,8 @@ ClassMethod processRequest(payload As %DynamicObject) As %DynamicObject
 {
 	try {
 		set id = payload.%Get("id")
-		set ^testdata(id, 2) = $ztimestamp
-		set ^testdata(id, 0) = id // Allows for more uniform data handling.
+		set ^testdata(id, 2) = $lb($ztimestamp, $job)
+		set ^testdata(id, 0) = $lb(id, $job) // Allows for more uniform data handling.
 
 		&sql(SELECT TOP 1 RestForwardingMethod INTO :fwdMethod FROM Demo.Settings)
 
@@ -76,7 +76,7 @@ ClassMethod processRequest(payload As %DynamicObject) As %DynamicObject
 			set result = msg.SizeGet()
 		} else {
 			// Forward request to the production.
-			set ^testdata(id, 3) = $ztimestamp
+			set ^testdata(id, 3) = $lb($ztimestamp, $job)
 			
 			if fwdMethod = "SYNC" {
 				// The standard way.
@@ -84,7 +84,7 @@ ClassMethod processRequest(payload As %DynamicObject) As %DynamicObject
 				$$$ThrowOnError(st)
 				set st = service.ProcessInput(payload, .result)
 				$$$ThrowOnError(st)
-				set ^testdata(id, 10) = $ztimestamp
+				set ^testdata(id, 10) = $lb($ztimestamp, $job)
 			} elseif fwdMethod = "ASYNC" {
 				// Job off the insertion into the production and ignore Business Service's response.
 				job ..CallServiceAsync(payload)
@@ -107,7 +107,7 @@ ClassMethod processRequest(payload As %DynamicObject) As %DynamicObject
 		do ..PrepareResponse( , 500)
 		do response.%Set("status", msg)
 	}
-	set ^testdata(id, 11) = $ztimestamp
+	set ^testdata(id, 11) = $lb($ztimestamp, $job)
 	return response
 }
 
@@ -293,7 +293,7 @@ ClassMethod getData() As %DynamicObject
 /// If the method is part of the current class, its name can be provided without prefix, with the <pre>..</pre> prefix, or with the full package name.
 ClassMethod AddDataSeries(ByRef dataObject As %DynamicObject, seriesName As %String, tdIndex As %Integer, dataType As %String = "number", func As %String = "") As %Status
 {
-	do dataObject.%Set( seriesName, [] )
+	do dataObject.%Set( seriesName, {"y":[], "pid":[] } )
 	
 	set cls = $piece( func, ".", 1, *-1 )
 	if (cls = "") || (cls = ".") set cls = $classname()
@@ -301,11 +301,10 @@ ClassMethod AddDataSeries(ByRef dataObject As %DynamicObject, seriesName As %Str
 
 	for key = 0:1:$order(^testdata(""),-1) {
 		if $data( ^testdata( key, tdIndex) ) '= 0 {
-			if func = "" {
-				do dataObject.%Get(seriesName).%Push( ^testdata( key, tdIndex), dataType )
-			} else {
-				do dataObject.%Get(seriesName).%Push( $classmethod( cls, mtd, ^testdata( key, tdIndex) ), dataType )
-			}
+			set $lb(value, pid) = ^testdata( key, tdIndex )
+			if func '= "" set value = $classmethod( cls, mtd, value )
+			do dataObject.%Get(seriesName).%Get("y").%Push( value, dataType )
+			do dataObject.%Get(seriesName).%Get("pid").%Push( pid, "number")
 		}
 	}
 	quit $$$OK

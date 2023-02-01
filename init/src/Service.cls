@@ -9,21 +9,21 @@ Parameter SETTINGS = "Sync:Basic";
 /// Forwarding is synchronous or asynchronous, depending on the value of the <property>Async</property> setting.
 Method OnProcessInput(input As %RegisteredObject, Output output As %RegisteredObject) As %Status
 {
-    set ^testdata(input.id, 4) = $ztimestamp
+    set ^testdata(input.id, 4) = $lb($ztimestamp, $job)
     set request = ##class(Demo.Request).%New()
     // Note that request.%FromJSON() will not work for messages larger than MAXSTRING.
     set request.Id = input.id
     set request.Message = input.%Get("message",,"stream")
 
-    set ^testdata(input.id, 5) = $ztimestamp
+    set ^testdata(input.id, 5) = $lb($ztimestamp, $job)
     if ..Sync = 1 {
         set st = ..SendRequestSync("Demo.Process", request, .response)
-        set ^testdata(input.id, 8) = $ztimestamp
+        set ^testdata(input.id, 8) = $lb($ztimestamp, $job)
     } else {
         set st = ..SendRequestAsync("Demo.Process", request)
     }
     set output = request.Message.SizeGet()
-    set ^testdata(input.id, 9) = $ztimestamp
+    set ^testdata(input.id, 9) = $lb($ztimestamp, $job)
     quit $$$OK
 }
 

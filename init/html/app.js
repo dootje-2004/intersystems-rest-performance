@@ -41,19 +41,23 @@ $(document).ready(function(){
     $('#run-button').on('click', function(){
         runTest();
     });
+    $('#message-button').on('click', function(){
+        window.open( '/csp/demo/EnsPortal.MessageViewer.zen', '_blank' ).focus();
+    });
+    $('#production-button').on('click', function(){
+        window.open( '/csp/demo/EnsPortal.ProductionConfig.zen?PRODUCTION=Demo.Production', '_blank' ).focus();
+    });
 });
 
-function refreshDashboard(){
-    console.log('Refreshing dashboard');
-    
+function refreshDashboard(){    
     // Get data from server.
     $.get( '/demo/data', function(data){
-        console.log(data);
+        // console.log(data);
         
         // Convert to durations in milliseconds.
-        let timeBP = subtractArrays( data.bpRespOut, data.bpReqIn );
-        let timeBS = subtractArrays( data.bsRespOut, data.bsReqIn );
-        let timeAPI = subtractArrays( data.apiRespOut, data.apiReqIn );
+        let timeBP = subtractArrays( data.bpRespOut.y, data.bpReqIn.y );
+        let timeBS = subtractArrays( data.bsRespOut.y, data.bsReqIn.y );
+        let timeAPI = subtractArrays( data.apiRespOut.y, data.apiReqIn.y );
         let timeRoundtrip = subtractArrays( clRespIn, clReqOut );
 
         let timeNet = subtractArrays( timeRoundtrip, timeAPI );
@@ -77,7 +81,7 @@ function refreshDashboard(){
         $('#data-transfer-rate').text( (clReqOut.length / totalTime).toFixed(3) );
         
         // Calculate column width.
-        let columnWidth = $('#chart').width() * 0.8 / data.id.length;
+        let columnWidth = $('#chart').width() * 0.8 / data.id.y.length;
 
         // Adapted from Highcharts stacked columns demo.
         Highcharts.chart('chart', {
@@ -85,7 +89,7 @@ function refreshDashboard(){
             chart: { type: 'column' },
             title: { text: 'Timing' },
             xAxis: {
-                categories: data.id,
+                categories: data.id.y,
                 title: { text: 'Request ID' } },
             yAxis: {
                 allowDecimals: true,
@@ -94,8 +98,14 @@ function refreshDashboard(){
             },
             tooltip: {
                 formatter: function(){
+                    let pid = 0;
+                    if (this.series.name != 'network') {
+                        pid = data[this.series.name.toLowerCase() + 'ReqIn'].pid[this.x];
+                        // TODO: How to handle a range of request IDs with multiple different process IDs?
+                    }
                     return '<b>Request' + (this.x.indexOf('-') > -1 ? 's ' : ' ') + this.x + '</b><br/>'
                     + this.series.name + ': ' + parseFloat(this.y).toFixed(3) + ' ms<br/>'
+                    + ( pid ? 'pid: ' + pid + '<br/>' : '' )
                     + 'Total: ' + parseFloat(this.point.stackTotal).toFixed(3) + ' ms';
                 }
             },
@@ -159,7 +169,7 @@ function sendTestMessage(url,body,callback){
         success: function(data){
             responseCount++;
             clRespIn[data.id] = Date.now() / 1000 ;
-            console.log(data);
+            // console.log(data);
             if ( responseCount == $('#request-count').val() ) {
                 refreshDashboard();
                 $('#run-button').prop('disabled', false);
