@@ -190,7 +190,9 @@ TODO: Difference between Docker and bare-metal (e.g. network speed)?
 
 TODO: ZPM package for bare-metal install.
 
-TODO: Compare scenarios two by two (instead of collecting test results for comparison).
+* Compare scenarios two by two (instead of collecting test results for comparison):
+not implmented. The user can open as many browser tabs as they wish and compare
+results between them.
 
 TODO: Database expansion: determine and set size
 before starting a test to eliminate overhead.
@@ -200,3 +202,7 @@ TODO: Influence of how streams are handled as compared to strings.
 TODO: Influence of stream compression.
 %Stream.GlobalCharacter property met parameter COMPRESS = -1.
 See [here](https://docs.intersystems.com/iris20222/csp/documatic/%25CSP.Documatic.cls?LIBRARY=%25SYS&PRIVATE=1&CLASSNAME=%25Stream.GlobalCharacter).
+
+It turns out that embedded SQL calls can be quite costly.
+We have replaced the most time-critical ones by globals
+(^clientsync, ^treatment, ^restforwarding).

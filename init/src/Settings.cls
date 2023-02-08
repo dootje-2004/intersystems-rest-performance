@@ -16,6 +16,9 @@ Property RequestSize As %Integer(MINVAL = 1);
 /// Indicates how the REST implementation class forwards requests.
 Property RestForwardingMethod As %String(VALUELIST = ",SYNC,ASYNC,STORE");
 
+/// Treat request payload as a string (1) or a stream (0).
+Property TreatAsString As %Boolean;
+
 Projection Populate As Demo.Settings;
 
 ClassMethod CreateProjection(cls As %String, ByRef params) As %Status
@@ -23,8 +26,11 @@ ClassMethod CreateProjection(cls As %String, ByRef params) As %Status
     // Fill the table with default values if it is empty.
     &sql(SELECT COUNT(*) INTO :cnt FROM Demo.Settings)
     if (cnt = 0) {
-        &sql(INSERT INTO Demo.Settings(ClientSync, PoolSize, RequestCount, RequestSize, RestForwardingMethod) VALUES (1, 1, 100, 1000, 'SYNC'))
+        &sql(INSERT INTO Demo.Settings(ClientSync, PoolSize, RequestCount, RequestSize, RestForwardingMethod, TreatAsString) VALUES (1, 1, 100, 1000, 'SYNC', 0))
     }
+    set ^clientsync = 1
+    set ^restforwarding = "SYNC"
+    set ^treatment = 0
     quit $$$OK
 }
 
@@ -48,6 +54,9 @@ Storage Default
 </Value>
 <Value name="6">
 <Value>RestForwardingMethod</Value>
+</Value>
+<Value name="7">
+<Value>TreatAsString</Value>
 </Value>
 </Data>
 <DataLocation>^Demo.SettingsD</DataLocation>

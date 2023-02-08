@@ -11,9 +11,15 @@ Method OnProcessInput(input As %RegisteredObject, Output output As %RegisteredOb
 {
     set ^testdata(input.id, 4) = $lb($ztimestamp, $job)
     set request = ##class(Demo.Request).%New()
-    // Note that request.%FromJSON() will not work for messages larger than MAXSTRING.
     set request.Id = input.id
-    set request.Message = input.%Get("message",,"stream")
+    
+    #; &sql(SELECT TOP 1 TreatAsString INTO :treat FROM Demo.Settings)
+    if ^treatment = 0 {
+        // Note that request.%FromJSON() will not work for messages larger than MAXSTRING.
+        set request.MessageStream = input.%Get("message",,"stream")
+    } else {
+        set request.MessageString = input.%Get("message",,"string")
+    }
 
     set ^testdata(input.id, 5) = $lb($ztimestamp, $job)
     if ..Sync = 1 {
@@ -22,7 +28,11 @@ Method OnProcessInput(input As %RegisteredObject, Output output As %RegisteredOb
     } else {
         set st = ..SendRequestAsync("Demo.Process", request)
     }
-    set output = request.Message.SizeGet()
+    if ^treatment = 0 {
+        set output = request.MessageStream.SizeGet()
+    } else {
+        set output = $length(request.MessageString)
+    }
     set ^testdata(input.id, 9) = $lb($ztimestamp, $job)
     quit $$$OK
 }

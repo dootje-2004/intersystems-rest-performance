@@ -27,6 +27,14 @@
             </div>
 
             <div class="menu-item">
+                <label for="request-type" class="tooltip">
+                    Treat as string:
+                    <span class="tooltiptext">Have the server process the request payload as a string instead of a stream.</span>
+                </label>
+                <input type="checkbox" id="request-type"/>
+            </div>
+
+            <div class="menu-item">
                 <label for="server-delay" class="tooltip">
                     BP delay:
                     <span class="tooltiptext">Extra delay in the Business Process (in milliseconds) to simulate an additional backend processing load.</span>

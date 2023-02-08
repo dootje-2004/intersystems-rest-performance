@@ -114,6 +114,39 @@
         "operationId": "setSize"
       }
     },
+    "/request/treatasstring": {
+      "get": {
+        "description": "Returns 1 if the request payload is processed as a string.",
+        "produces": [
+          "text/plain"
+        ],
+        "responses": {
+          "200": {
+            "description": "Value is returned normally."
+          }
+        },
+        "operationId": "getPayloadTreatment"
+      }
+    },
+    "/request/treatasstring/{treat}": {
+      "put": {
+        "description": "Stores the setting of how the request payload is processed (string or stream).",
+        "parameters": [
+          {
+            "in": "path",
+            "type": "number",
+            "name": "treat",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Value has been set."
+          }
+        },
+        "operationId": "setPayloadTreatment"
+      }
+    },
     "/process/delay": {
       "get": {
         "description": "Returns the processing delay of the server's Business Process.",

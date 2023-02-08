@@ -3,7 +3,9 @@ Class Demo.Message Extends %Persistent
 
 Property Id As %Integer;
 
-Property Payload As %Stream.GlobalCharacter;
+Property PayloadStream As %Stream.GlobalCharacter;
+
+Property PayloadString As %String(MAXLEN = 3641144);
 
 Storage Default
 {
@@ -15,7 +17,10 @@ Storage Default
 <Value>Id</Value>
 </Value>
 <Value name="3">
-<Value>Payload</Value>
+<Value>PayloadStream</Value>
+</Value>
+<Value name="4">
+<Value>PayloadString</Value>
 </Value>
 </Data>
 <DataLocation>^Demo.MessageD</DataLocation>

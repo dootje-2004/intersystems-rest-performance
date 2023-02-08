@@ -1,15 +1,23 @@
 var test_id;
 
 $(document).ready(function(){
-    let maxThreads = navigator.hardwareConcurrency || 8;
+    let maxThreads = navigator.hardwareConcurrency || 4;
     $('#server-poolsize').prop('max', maxThreads);
 
     $.get( '/demo/request/count', function(data){ $('#request-count').val(data); }, 'text' );
-    $.get( '/demo/request/size', function(data){ $('#request-size').val(data); }, 'text' );
+    $.get( '/demo/request/size', function(data){ 
+        $('#request-size').val(data); 
+        if (data > 3641144 ) {
+            $('#request-type').prop('disabled',true);
+        }
+    }, 'text' );
+    $.get( '/demo/request/treatasstring', function(data){
+        $('#request-type').prop('checked', data=='1');
+     }, 'text' );
     $.get( '/demo/process/delay', function(data){ $('#server-delay').val(data); }, 'text' );
     $.get( '/demo/process/poolsize', function(data){ $('#server-poolsize').val(data); }, 'text' );
     $.get( '/demo/service/sync', function(data){ 
-        $('#service-sync').prop('checked',data=='1'); 
+        $('#service-sync').prop('checked', data=='1'); 
         updateArrows();
     }, 'text' );
     $.get( '/demo/rest/forward', function(data){ 
@@ -23,7 +31,17 @@ $(document).ready(function(){
 
     // Behaviors.
     $('#request-count').on( 'change', function(){ $.ajax({ method: 'PUT', url: '/demo/request/count/' + $(this).val() }); });
-    $('#request-size').on( 'change', function(){ $.ajax({ method: 'PUT', url: '/demo/request/size/' + $(this).val() }); });
+    $('#request-size').on( 'input', function(){ 
+        $.ajax({ method: 'PUT', url: '/demo/request/size/' + $(this).val() }); 
+        if ($(this).val() > 3641144) {
+            $('#request-type').prop('checked', false).prop('disabled',true);
+        } else {
+            $('#request-type').prop('disabled', false);
+        }
+    });
+    $('#request-type').on( 'change', function(){ 
+        $.ajax({ method: 'PUT', url: '/demo/request/treatasstring/' + ($(this).prop('checked')?'1':'0') }); 
+    });
     $('#server-delay').on( 'change', function(){ $.ajax({ method: 'PUT', url: '/demo/process/delay/' + $(this).val() }); });
     $('#server-poolsize').on( 'change', function(){ $.ajax({ method: 'PUT', url: '/demo/process/poolsize/' + $(this).val() }); });
     $('#service-sync').on( 'change', function(){ 
@@ -105,7 +123,7 @@ function refreshDashboard(){
                     }
                     return '<b>Request' + (this.x.indexOf('-') > -1 ? 's ' : ' ') + this.x + '</b><br/>'
                     + this.series.name + ': ' + parseFloat(this.y).toFixed(3) + ' ms<br/>'
-                    + ( pid ? 'pid: ' + pid + '<br/>' : '' )
+                    + ( pid ? 'PID: ' + pid + '<br/>' : '' )
                     + 'Total: ' + parseFloat(this.point.stackTotal).toFixed(3) + ' ms';
                 }
             },
@@ -157,7 +175,8 @@ function runTest(){
 }
 
 function sendTestMessage(url,body,callback){
-    clReqOut[ body.id ] = Date.now() / 1000;
+    // clReqOut[ body.id ] = Date.now() / 1000.0;
+    clReqOut[ body.id ] = window.performance.now() / 1000.0;
     $.ajax({
         url: url,
         async: ! $('#client-sync').prop('checked'),
@@ -168,7 +187,8 @@ function sendTestMessage(url,body,callback){
         method: 'POST',
         success: function(data){
             responseCount++;
-            clRespIn[data.id] = Date.now() / 1000 ;
+            // clRespIn[data.id] = Date.now() / 1000 ;
+            clRespIn[data.id] = window.performance.now() / 1000 ;
             // console.log(data);
             if ( responseCount == $('#request-count').val() ) {
                 refreshDashboard();

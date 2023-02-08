@@ -2,6 +2,8 @@
 
 ## Open issues
 
+TODO: When REST setting = ASYNC, no data points are collected.
+
 ## Solved issues
 
 *What type of license is best for the GitHub repository?*

@@ -4,21 +4,14 @@
 
 Show the performance (requests per second) of IRIS's REST functionality.
 
-## Usage
-
-Access the client at <http://localhost:9090/csp/sys/utilhome.csp>
-and the server at <http://localhost:9090/csp/sys/utilhome.csp>.
-
 ## Setup
 
-Send a controlled number of requests per second from one IRIS instance (the *client*) to another (the *server*).
-Have a dashboard show the time it takes to pass each stage of the processing (network, unpacking, business logic, storage, response).
+Clone or download the repository.
+Start the test environment with `docker-compose up -d`.
+If you have the **make** utility installed, you can also issue
+`make build` to start the container.
 
-Parameters on the client side:
+## Usage
 
-* Number of requests per second
-* Payload size
-
-Parameters on the server side:
-
-* Number of threads (parallel processes) handling the requests
+Access the user interface at <http://localhost:9090/csp/demo/ui.html>.
+and the server at <http://localhost:9090/csp/sys/utilhome.csp>.

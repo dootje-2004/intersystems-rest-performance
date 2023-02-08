@@ -67,28 +67,34 @@ ClassMethod processRequest(payload As %DynamicObject) As %DynamicObject
 		set ^testdata(id, 2) = $lb($ztimestamp, $job)
 		set ^testdata(id, 0) = $lb(id, $job) // Allows for more uniform data handling.
 
-		&sql(SELECT TOP 1 RestForwardingMethod INTO :fwdMethod FROM Demo.Settings)
+		#; &sql(SELECT TOP 1 RestForwardingMethod, TreatAsString INTO :fwdMethod, :treat FROM Demo.Settings)
+		#; Use ^restforwarding and ^treatment instead.
 
-		if fwdMethod = "STORE" {
+		if ^restforwarding = "STORE" {
 			// Store message without sending it to the production.
-    		set msg = payload.%Get("message",,"stream")
-			&sql(INSERT INTO Demo.Message(Id, Payload) VALUES(:id,:msg))
+			if ^treatment = 0 {
+    			set msg = payload.%Get("message",,"stream")
+				&sql(INSERT INTO Demo.Message(Id, PayloadStream) VALUES(:id,:msg))
+			} else {
+    			set msg = payload.%Get("message",,"string")
+				&sql(INSERT INTO Demo.Message(Id, PayloadString) VALUES(:id,:msg))
+			}
 			set result = msg.SizeGet()
 		} else {
 			// Forward request to the production.
 			set ^testdata(id, 3) = $lb($ztimestamp, $job)
 			
-			if fwdMethod = "SYNC" {
+			if ^restforwarding = "SYNC" {
 				// The standard way.
 				set st = ##class(Ens.Director).CreateBusinessService("Demo.Service", .service)
 				$$$ThrowOnError(st)
 				set st = service.ProcessInput(payload, .result)
 				$$$ThrowOnError(st)
 				set ^testdata(id, 10) = $lb($ztimestamp, $job)
-			} elseif fwdMethod = "ASYNC" {
+			} elseif ^restforwarding = "ASYNC" {
 				// Job off the insertion into the production and ignore Business Service's response.
 				job ..CallServiceAsync(payload)
-				set result = payload.%Get("message",,"stream").SizeGet()
+				set result = payload.%Get("message",,$case(treat,1:"string",:"stream")).SizeGet()
 			} else {
 				// Throw exception: unknown forwarding method.
 				throw ##class(%Exception.StatusException).%New("Unknown option: %1",,,$lb(fwdMethod))
@@ -134,7 +140,7 @@ ClassMethod getCount() As %Integer
 /// Stores the number of test requests.
 ClassMethod setCount(count) As %String
 {
-	&sql(Update Demo.Settings SET RequestCount = :count FROM Demo.Settings)
+	&sql(Update Demo.Settings SET RequestCount = :count)
 	do ..PrepareResponse()
 	return "OK"
 }
@@ -150,7 +156,24 @@ ClassMethod getSize() As %Integer
 /// Stores the payload size of the test requests.
 ClassMethod setSize(size) As %String
 {
-	&sql(Update Demo.Settings SET RequestSize = :size FROM Demo.Settings)
+	&sql(Update Demo.Settings SET RequestSize = :size)
+	do ..PrepareResponse()
+	return "OK"
+}
+
+/// Returns 1 if the request payload is processed as a string.
+ClassMethod getPayloadTreatment() As %String
+{
+	&sql(SELECT TOP 1 TreatAsString INTO :treat FROM Demo.Settings)
+	do ..PrepareResponse()
+	return treat
+}
+
+/// Stores the setting of how the request payload is processed (string or stream).<br/>
+ClassMethod setPayloadTreatment(treat As %Boolean) As %String
+{
+	&sql(Update Demo.Settings SET TreatAsString = :treat)
+	set ^treatment = treat
 	do ..PrepareResponse()
 	return "OK"
 }
@@ -167,6 +190,7 @@ ClassMethod getClientSync() As %Integer
 ClassMethod setClientSync(sync As %Boolean) As %String
 {
 	&sql(UPDATE Demo.Settings SET ClientSync = :sync)
+	set ^clientsync = sync
 	do ..PrepareResponse()
 	return "OK"
 }
@@ -230,6 +254,7 @@ ClassMethod setServiceSync(sync As %Integer) As %String
 {
 	set settings("Demo.Service", "Host", "Sync") = sync
 	set st = ##class(Ens.Production).ApplySettings("Demo.Production",.settings)
+	set ^servicesync = sync
 	do ..PrepareResponse()
 	return "OK"
 }
@@ -247,6 +272,7 @@ ClassMethod setForwardingMethod(method As %String) As %String
 {
 	&sql(UPDATE Demo.Settings SET RestForwardingMethod = :method)
 	if SQLCODE = 0 {
+		set ^restforwarding = method
 		do ..PrepareResponse()
 		return "OK"
 	} else {
