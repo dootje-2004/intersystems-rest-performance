@@ -1,23 +1,21 @@
+/// Persists the test settings, so the UI can show them.
 Class Demo.Settings Extends (%Persistent, %Projection.AbstractProjection)
 {
 
 /// Indicates how the browser calls the API.
 Property ClientSync As %Boolean;
 
-/// Business Process poolsize.
-Property PoolSize As %Integer(MINVAL = 1);
-
 /// Number of test requests.
-Property RequestCount As %Integer(MINVAL = 1);
+Property CallCount As %Integer(MINVAL = 1);
 
 /// Size (in characters) of each request's payload.
-Property RequestSize As %Integer(MINVAL = 1);
+Property PayloadSize As %Integer(MINVAL = 1);
 
 /// Indicates how the REST implementation class forwards requests.
-Property RestForwardingMethod As %String(VALUELIST = ",SYNC,ASYNC,STORE");
+Property RestForwarding As %String(VALUELIST = ",SYNC,ASYNC,STORE");
 
 /// Treat request payload as a string (1) or a stream (0).
-Property TreatAsString As %Boolean;
+Property PayloadDatatype As %String(VALUELIST = ",stream,string");
 
 Projection Populate As Demo.Settings;
 
@@ -26,12 +24,12 @@ ClassMethod CreateProjection(cls As %String, ByRef params) As %Status
     // Fill the table with default values if it is empty.
     &sql(SELECT COUNT(*) INTO :cnt FROM Demo.Settings)
     if (cnt = 0) {
-        &sql(INSERT INTO Demo.Settings(ClientSync, PoolSize, RequestCount, RequestSize, RestForwardingMethod, TreatAsString) VALUES (1, 1, 100, 1000, 'SYNC', 0))
+        &sql(INSERT INTO Demo.Settings(
+            ClientSync, CallCount, PayloadSize, RestForwarding, PayloadDatatype) 
+            VALUES (1, 100, 1000, 'SYNC', 'string' )
+        )
     }
-    set ^clientsync = 1
-    set ^restforwarding = "SYNC"
-    set ^treatment = 0
-    quit $$$OK
+    return $$$OK
 }
 
 Storage Default
@@ -44,19 +42,16 @@ Storage Default
 <Value>ClientSync</Value>
 </Value>
 <Value name="3">
-<Value>PoolSize</Value>
+<Value>CallCount</Value>
 </Value>
 <Value name="4">
-<Value>RequestCount</Value>
+<Value>PayloadSize</Value>
 </Value>
 <Value name="5">
-<Value>RequestSize</Value>
+<Value>RestForwarding</Value>
 </Value>
 <Value name="6">
-<Value>RestForwardingMethod</Value>
-</Value>
-<Value name="7">
-<Value>TreatAsString</Value>
+<Value>PayloadDatatype</Value>
 </Value>
 </Data>
 <DataLocation>^Demo.SettingsD</DataLocation>

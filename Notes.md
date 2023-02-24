@@ -181,6 +181,24 @@ The modes we test are:
 In general, we can't assume the client and server clocks to run in sync.
 This is especially true when running the tests on separate machines.
 
+## Terminology
+
+We are dealing with data that is taking a different shape at each step in the
+testing process. To clarify things, we use different names for that data at
+each stage.
+
+A **call** is the act of sending an HHTP request from the client to the server;
+we also use this term to signify the HTTP request itself, to distinguish it from
+the requests transmitted inside the IRIS server production.
+
+The body of a call is the **message** we are transmitting. In our case this is an
+object consisting of an ID and a **payload**.
+The server processes that payload either as a string or as a stream.
+
+If the test involves injecting the message into the server's production, the
+server's REST class creates a **request** from it and sends it to the production.
+The REST class may receive a **response** in return.
+
 ## Research
 
 TODO: What influence does the network (actually the socket) have?
@@ -206,3 +224,5 @@ See [here](https://docs.intersystems.com/iris20222/csp/documatic/%25CSP.Documati
 It turns out that embedded SQL calls can be quite costly.
 We have replaced the most time-critical ones by globals
 (^clientsync, ^treatment, ^restforwarding).
+
+The maximum string length is returned by `$system.SYS.MaxLocalLength()`.

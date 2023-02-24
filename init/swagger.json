@@ -18,9 +18,9 @@
     "http"
   ],
   "paths": {
-    "/": {
+    "/call/forward/sync/stream": {
       "post": {
-        "description": "Allows upload of a single request.",
+        "description": "Accepts a call; forwards message synchronously with stream payload.",
         "consumes": [
           "application/json"
         ],
@@ -29,7 +29,7 @@
         ],
         "parameters": [
           {
-            "name": "payload",
+            "name": "message",
             "in": "body",
             "schema": {
               "$ref": "#/definitions/Message"
@@ -39,250 +39,190 @@
         ],
         "responses": {
           "201": {
-            "description": "Object has been saved"
+            "description": "Message has been saved"
           },
           "default": {
             "description": "Unexpected error"
           }
         },
-        "operationId": "processRequest"
+        "operationId": "forwardMessageSyncWithStreamPayload"
       }
     },
-    "/request/count": {
-      "get": {
-        "description": "Returns the number of test requests.",
-        "produces": [
-          "text/plain"
+    "/call/forward/sync/string": {
+      "post": {
+        "description": "Accepts a call; forwards message synchronously with string payload.",
+        "consumes": [
+          "application/json"
         ],
-        "responses": {
-          "200": {
-            "description": "Value is returned normally."
-          }
-        },
-        "operationId": "getCount"
-      }
-    },
-    "/request/count/{count}": {
-      "put": {
-        "description": "Stores the number of test requests.",
+        "produces": [
+          "application/json"
+        ],
         "parameters": [
           {
-            "in": "path",
-            "type": "number",
-            "name": "count",
+            "name": "message",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/Message"
+            },
             "required": true
           }
         ],
         "responses": {
-          "200": {
-            "description": "Value has been set."
+          "201": {
+            "description": "Message has been saved"
+          },
+          "default": {
+            "description": "Unexpected error"
           }
         },
-        "operationId": "setCount"
+        "operationId": "forwardMessageSyncWithStringPayload"
       }
     },
-    "/request/size": {
-      "get": {
-        "description": "Returns the size of the request payload.",
-        "produces": [
-          "text/plain"
+    "/call/forward/async/stream": {
+      "post": {
+        "description": "Accepts a call; forwards message asynchronously with stream payload.",
+        "consumes": [
+          "application/json"
         ],
-        "responses": {
-          "200": {
-            "description": "Value is returned normally."
-          }
-        },
-        "operationId": "getSize"
-      }
-    },
-    "/request/size/{size}": {
-      "put": {
-        "description": "Stores the size of the request payload.",
+        "produces": [
+          "application/json"
+        ],
         "parameters": [
           {
-            "in": "path",
-            "type": "number",
-            "name": "size",
+            "name": "message",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/Message"
+            },
             "required": true
           }
         ],
         "responses": {
-          "200": {
-            "description": "Value has been set."
+          "201": {
+            "description": "Message has been saved"
+          },
+          "default": {
+            "description": "Unexpected error"
           }
         },
-        "operationId": "setSize"
+        "operationId": "forwardMessageAsyncWithStreamPayload"
       }
     },
-    "/request/treatasstring": {
-      "get": {
-        "description": "Returns 1 if the request payload is processed as a string.",
-        "produces": [
-          "text/plain"
+    "/call/forward/async/string": {
+      "post": {
+        "description": "Accepts a call; forwards message asynchronously with string payload.",
+        "consumes": [
+          "application/json"
         ],
-        "responses": {
-          "200": {
-            "description": "Value is returned normally."
-          }
-        },
-        "operationId": "getPayloadTreatment"
-      }
-    },
-    "/request/treatasstring/{treat}": {
-      "put": {
-        "description": "Stores the setting of how the request payload is processed (string or stream).",
+        "produces": [
+          "application/json"
+        ],
         "parameters": [
           {
-            "in": "path",
-            "type": "number",
-            "name": "treat",
+            "name": "message",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/Message"
+            },
             "required": true
           }
         ],
         "responses": {
-          "200": {
-            "description": "Value has been set."
+          "201": {
+            "description": "Message has been saved"
+          },
+          "default": {
+            "description": "Unexpected error"
           }
         },
-        "operationId": "setPayloadTreatment"
+        "operationId": "forwardMessageAsyncWithStringPayload"
       }
     },
-    "/process/delay": {
-      "get": {
-        "description": "Returns the processing delay of the server's Business Process.",
-        "produces": [
-          "text/plain"
+    "/call/store/string": {
+      "post": {
+        "description": "Accepts a call; stores message with string payload.",
+        "consumes": [
+          "application/json"
         ],
-        "responses": {
-          "200": {
-            "description": "Value is returned normally."
-          }
-        },
-        "operationId": "getDelay"
-      }
-    },
-    "/process/delay/{delay}": {
-      "put": {
-        "description": "Sets the processing delay of the server's Business Process.",
+        "produces": [
+          "application/json"
+        ],
         "parameters": [
           {
-            "in": "path",
-            "type": "number",
-            "name": "delay",
+            "name": "message",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/Message"
+            },
             "required": true
           }
         ],
         "responses": {
-          "200": {
-            "description": "Value has been set."
+          "201": {
+            "description": "Message has been saved"
+          },
+          "default": {
+            "description": "Unexpected error"
           }
         },
-        "operationId": "setDelay"
+        "operationId": "storeMessageWithStringPayload"
       }
     },
-    "/process/poolsize": {
-      "get": {
-        "description": "Returns the poolsize of the server's Business Process.",
-        "produces": [
-          "text/plain"
+    "/call/store/stream": {
+      "post": {
+        "description": "Accepts a call; stores message with stream payload.",
+        "consumes": [
+          "application/json"
         ],
-        "responses": {
-          "200": {
-            "description": "Value is returned normally."
-          }
-        },
-        "operationId": "getPoolsize"
-      }
-    },
-    "/process/poolsize/{poolsize}": {
-      "put": {
-        "description": "Sets the poolsize of the server's Business Process.",
+        "produces": [
+          "application/json"
+        ],
         "parameters": [
           {
-            "in": "path",
-            "type": "number",
-            "name": "poolsize",
+            "name": "message",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/Message"
+            },
             "required": true
           }
         ],
         "responses": {
-          "200": {
-            "description": "Value has been set."
+          "201": {
+            "description": "Message has been saved"
+          },
+          "default": {
+            "description": "Unexpected error"
           }
         },
-        "operationId": "setPoolsize"
+        "operationId": "storeMessageWithStreamPayload"
       }
     },
-    "/service/sync": {
+    "/settings": {
       "get": {
-        "description": "Returns the Sync setting of the Business Service.",
+        "description": "Returns all test settings.",
         "produces": [
-          "text/plain"
+          "application/json"
         ],
         "responses": {
           "200": {
             "description": "Value is returned normally."
           }
         },
-        "operationId": "getServiceSync"
+        "operationId": "getAllSettings"
       }
     },
-    "/service/sync/{sync}": {
-      "put": {
-        "description": "Sets the Sync parameter of the Business Service.",
-        "parameters": [
-          {
-            "in": "path",
-            "type": "number",
-            "name": "sync",
-            "required": true
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Value has been set."
-          }
-        },
-        "operationId": "setServiceSync"
-      }
-    },
-    "/rest/forward": {
+    "/setting/{settingname}": {
       "get": {
-        "description": "Returns the forwarding method of the REST class.",
-        "produces": [
-          "text/plain"
-        ],
-        "responses": {
-          "200": {
-            "description": "Value is returned normally."
-          }
-        },
-        "operationId": "getForwardingMethod"
-      }
-    },
-    "/rest/forward/{method}": {
-      "put": {
-        "description": "Sets the forwarding method of the REST class.",
+        "description": "Returns a setting.",
         "parameters": [
           {
             "in": "path",
             "type": "string",
-            "enum": [ "SYNC", "ASYNC", "STORE" ],
-            "name": "method",
+            "name": "settingname",
             "required": true
           }
         ],
-        "responses": {
-          "200": {
-            "description": "Value has been set."
-          }
-        },
-        "operationId": "setForwardingMethod"
-      }
-    },
-    "/client/sync": {
-      "get": {
-        "description": "Returns the Sync setting for the client.",
         "produces": [
           "text/plain"
         ],
@@ -291,26 +231,35 @@
             "description": "Value is returned normally."
           }
         },
-        "operationId": "getClientSync"
+        "operationId": "getSetting"
       }
     },
-    "/client/sync/{sync}": {
+    "/setting/{settingname}/{settingvalue}": {
       "put": {
-        "description": "Stores the Sync parameter for the client.",
+        "description": "Stores a setting and updates it on the server if applicable.",
         "parameters": [
           {
             "in": "path",
-            "type": "number",
-            "name": "sync",
+            "type": "string",
+            "name": "settingname",
+            "required": true
+          },
+          {
+            "in": "path",
+            "type": "string",
+            "name": "settingvalue",
             "required": true
           }
         ],
+        "produces": [
+          "text/plain"
+        ],
         "responses": {
           "200": {
-            "description": "Value has been set."
+            "description": "Setting has been applied."
           }
         },
-        "operationId": "setClientSync"
+        "operationId": "updateSetting"
       }
     },
     "/data": {
@@ -333,7 +282,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Data removed."
+            "description": "Data deleted."
           }
         },
         "operationId": "deleteData"
@@ -348,7 +297,7 @@
           "description": "Unique identifier",
           "type": "integer"
         },
-        "message": {
+        "payload": {
           "description": "Arbitrary string",
           "type": "string"
         }

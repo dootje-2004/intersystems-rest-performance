@@ -4,35 +4,25 @@ $(document).ready(function(){
     let maxThreads = navigator.hardwareConcurrency || 4;
     $('#server-poolsize').prop('max', maxThreads);
 
-    $.get( '/demo/request/count', function(data){ $('#request-count').val(data); }, 'text' );
-    $.get( '/demo/request/size', function(data){ 
-        $('#request-size').val(data); 
-        if (data > 3641144 ) {
+    $.get( '/demo/settings', function(data){
+        $('#request-count').val(data.callcount);
+        $('#request-size').val(data.payloadsize); 
+        if (data.payloadsize > 3641144 ) {
             $('#request-type').prop('disabled',true);
         }
-    }, 'text' );
-    $.get( '/demo/request/treatasstring', function(data){
-        $('#request-type').prop('checked', data=='1');
-     }, 'text' );
-    $.get( '/demo/process/delay', function(data){ $('#server-delay').val(data); }, 'text' );
-    $.get( '/demo/process/poolsize', function(data){ $('#server-poolsize').val(data); }, 'text' );
-    $.get( '/demo/service/sync', function(data){ 
-        $('#service-sync').prop('checked', data=='1'); 
+        $('#request-type').prop('checked', data.payloaddatatype=='string');
+        $('#server-delay').val(data.bpdelay);
+        $('#server-poolsize').val(data.bppoolsize);
+        $('#service-sync').prop('checked', data.bssync=='1'); 
+        $('#api-action').val(data.restforwarding); 
+        $('#client-sync').prop('checked',data.clientsync=='1'); 
         updateArrows();
-    }, 'text' );
-    $.get( '/demo/rest/forward', function(data){ 
-        $('#api-action').val(data); 
-        updateArrows();
-    }, 'text' );
-    $.get( '/demo/client/sync', function(data){ 
-        $('#client-sync').prop('checked',data=='1'); 
-        updateArrows();
-    }, 'text' );
+    }, 'json' );
 
-    // Behaviors.
-    $('#request-count').on( 'change', function(){ $.ajax({ method: 'PUT', url: '/demo/request/count/' + $(this).val() }); });
+    // Attach behaviors.
+    $('#request-count').on( 'change', function(){ $.ajax({ method: 'PUT', url: '/demo/setting/callcount/' + $(this).val() }); });
     $('#request-size').on( 'input', function(){ 
-        $.ajax({ method: 'PUT', url: '/demo/request/size/' + $(this).val() }); 
+        $.ajax({ method: 'PUT', url: '/demo/setting/payloadsize/' + $(this).val() }); 
         if ($(this).val() > 3641144) {
             $('#request-type').prop('checked', false).prop('disabled',true);
         } else {
@@ -40,20 +30,20 @@ $(document).ready(function(){
         }
     });
     $('#request-type').on( 'change', function(){ 
-        $.ajax({ method: 'PUT', url: '/demo/request/treatasstring/' + ($(this).prop('checked')?'1':'0') }); 
+        $.ajax({ method: 'PUT', url: '/demo/setting/payloaddatatype/' + ($(this).prop('checked')?'string':'stream') }); 
     });
-    $('#server-delay').on( 'change', function(){ $.ajax({ method: 'PUT', url: '/demo/process/delay/' + $(this).val() }); });
-    $('#server-poolsize').on( 'change', function(){ $.ajax({ method: 'PUT', url: '/demo/process/poolsize/' + $(this).val() }); });
+    $('#server-delay').on( 'change', function(){ $.ajax({ method: 'PUT', url: '/demo/setting/bpdelay/' + $(this).val() }); });
+    $('#server-poolsize').on( 'change', function(){ $.ajax({ method: 'PUT', url: '/demo/setting/bppoolsize/' + $(this).val() }); });
     $('#service-sync').on( 'change', function(){ 
-        $.ajax({ method: 'PUT', url: '/demo/service/sync/' + ($(this).prop('checked')?'1':'0') }); 
+        $.ajax({ method: 'PUT', url: '/demo/setting/bssync/' + ($(this).prop('checked')?'1':'0') }); 
         updateArrows();
     });
     $('#api-action').on( 'change', function(){ $.ajax({ 
-        method: 'PUT', url: '/demo/rest/forward/' + $(this).val() }); 
+        method: 'PUT', url: '/demo/setting/restforwarding/' + $(this).val() }); 
         updateArrows();
     });
     $('#client-sync').on( 'change', function(){ $.ajax({ 
-        method: 'PUT', url: '/demo/client/sync/' + ($(this).prop('checked')?'1':'0') }); 
+        method: 'PUT', url: '/demo/setting/clientsync/' + ($(this).prop('checked')?'1':'0') }); 
         updateArrows();
     });
     $('#run-button').on('click', function(){
@@ -70,7 +60,6 @@ $(document).ready(function(){
 function refreshDashboard(){    
     // Get data from server.
     $.get( '/demo/data', function(data){
-        // console.log(data);
         
         // Convert to durations in milliseconds.
         let timeBP = subtractArrays( data.bpRespOut.y, data.bpReqIn.y );
@@ -119,7 +108,6 @@ function refreshDashboard(){
                     let pid = 0;
                     if (this.series.name != 'network') {
                         pid = data[this.series.name.toLowerCase() + 'ReqIn'].pid[this.x];
-                        // TODO: How to handle a range of request IDs with multiple different process IDs?
                     }
                     return '<b>Request' + (this.x.indexOf('-') > -1 ? 's ' : ' ') + this.x + '</b><br/>'
                     + this.series.name + ': ' + parseFloat(this.y).toFixed(3) + ' ms<br/>'
@@ -169,13 +157,20 @@ function runTest(){
         async: false,
         method: 'DELETE',
         success: function(){
-            for (let i = 0; i < count; i++) sendTestMessage('/demo/', { "id": i, "message": payload });
+            let url = '/demo/call/';
+            if ( $('#api-action').val() == 'STORE' ){
+                url += 'store/';
+            } else {
+                url += 'forward/';
+                url += $('#service-sync').prop('checked') ? 'sync/' : 'async/';
+            }
+            url += $('#request-type').prop('checked') ? 'string' : 'stream';
+            for (let i = 0; i < count; i++) sendTestMessage(url, { "id": i, "message": payload });
         }
     });
 }
 
 function sendTestMessage(url,body,callback){
-    // clReqOut[ body.id ] = Date.now() / 1000.0;
     clReqOut[ body.id ] = window.performance.now() / 1000.0;
     $.ajax({
         url: url,
@@ -187,9 +182,7 @@ function sendTestMessage(url,body,callback){
         method: 'POST',
         success: function(data){
             responseCount++;
-            // clRespIn[data.id] = Date.now() / 1000 ;
             clRespIn[data.id] = window.performance.now() / 1000 ;
-            // console.log(data);
             if ( responseCount == $('#request-count').val() ) {
                 refreshDashboard();
                 $('#run-button').prop('disabled', false);

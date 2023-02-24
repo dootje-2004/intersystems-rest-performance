@@ -54,9 +54,110 @@ ClassMethod CopyMethods(className As %String) As %Status
 		set status = class.%Save()
 		if status '= $$$OK quit
 	}
-	if status '= $$$OK quit status
+	if status '= $$$OK return status
 	set status = $system.OBJ.Compile(className)
-	quit status
+	return status
+}
+
+/// Accepts a call; forwards message synchronously with stream payload.
+ClassMethod forwardMessageSyncWithStreamPayload(message As %DynamicObject) As %DynamicObject
+{
+	set id = message.%Get("id")
+	set ^testdata(id, 2) = $lb($ztimestamp, $job)
+	set ^testdata(id, 0) = $lb(id, $job) // Allows for more uniform data handling.
+
+	set ^testdata(id, 3) = $lb($ztimestamp, $job)
+	set st = ##class(Ens.Director).CreateBusinessService("Demo.StreamService", .service)
+	set st = service.ProcessInput(message, .result)
+	set ^testdata(id, 10) = $lb($ztimestamp, $job)
+
+	set response = {}.%Set("status", "OK").%Set("id", id).%Set("result", result)
+	do ..PrepareResponse("json", 201)
+	set ^testdata(id, 11) = $lb($ztimestamp, $job)
+	return response
+}
+
+/// Accepts a call; forwards message synchronously with string payload.
+ClassMethod forwardMessageSyncWithStringPayload(message As %DynamicObject) As %DynamicObject
+{
+	set id = message.%Get("id")
+	set ^testdata(id, 2) = $lb($ztimestamp, $job)
+	set ^testdata(id, 0) = $lb(id, $job)
+
+	set ^testdata(id, 3) = $lb($ztimestamp, $job)
+	set st = ##class(Ens.Director).CreateBusinessService("Demo.StringService", .service)
+	set st = service.ProcessInput(message, .result)
+	set ^testdata(id, 10) = $lb($ztimestamp, $job)
+
+	set response = {}.%Set("status", "OK").%Set("id", id).%Set("result", result)
+	do ..PrepareResponse("json", 201)
+	set ^testdata(id, 11) = $lb($ztimestamp, $job)
+	return response
+}
+
+/// Accepts a call; forwards message asynchronously with stream payload.
+ClassMethod forwardMessageAsyncWithStreamPayload(message As %DynamicObject) As %DynamicObject
+{
+	set id = message.%Get("id")
+	set ^testdata(id, 2) = $lb($ztimestamp, $job)
+	set ^testdata(id, 0) = $lb(id, $job)
+
+	set ^testdata(id, 3) = $lb($ztimestamp, $job)
+	// Job off the insertion into the production and ignore Business Service's response.
+	job ..CallServiceAsync("Demo.StreamService", message)
+
+	set response = {}.%Set("status", "OK").%Set("id", id).%Set("result", "sent")
+	do ..PrepareResponse("json", 201)
+	set ^testdata(id, 11) = $lb($ztimestamp, $job)
+	return response
+}
+
+/// Accepts a call; forwards message asynchronously with string payload.
+ClassMethod forwardMessageAsyncWithStringPayload(message As %DynamicObject) As %DynamicObject
+{
+	set id = message.%Get("id")
+	set ^testdata(id, 2) = $lb($ztimestamp, $job)
+	set ^testdata(id, 0) = $lb(id, $job)
+
+	set ^testdata(id, 3) = $lb($ztimestamp, $job)
+	job ..CallServiceAsync("Demo.StringService", message)
+
+	set response = {}.%Set("status", "OK").%Set("id", id).%Set("result", "sent")
+	do ..PrepareResponse("json", 201)
+	set ^testdata(id, 11) = $lb($ztimestamp, $job)
+	return response
+}
+
+/// Accepts a call; stores message with string payload.
+ClassMethod storeMessageWithStringPayload(message As %DynamicObject) As %DynamicObject
+{
+	set id = message.%Get("id")
+	set ^testdata(id, 2) = $lb($ztimestamp, $job)
+	set ^testdata(id, 0) = $lb(id, $job)
+
+	set msg = message.%Get("message",,"string")
+	&sql(INSERT INTO Demo.StringMessage(Id, Payload) VALUES(:id, :msg))
+
+	set response = {}.%Set("status", "OK").%Set("id", id).%Set("result", "stored")
+	do ..PrepareResponse("json", 201)
+	set ^testdata(id, 11) = $lb($ztimestamp, $job)
+	return response
+}
+
+/// Accepts a call; stores message with stream payload.
+ClassMethod storeMessageWithStreamPayload(message As %DynamicObject) As %DynamicObject
+{
+	set id = message.%Get("id")
+	set ^testdata(id, 2) = $lb($ztimestamp, $job)
+	set ^testdata(id, 0) = $lb(id, $job)
+
+	set msg = message.%Get("message",,"stream")
+	&sql(INSERT INTO Demo.StreamMessage(Id, Payload) VALUES(:id, :msg))
+
+	set response = {}.%Set("status", "OK").%Set("id", id).%Set("result", "stored")
+	do ..PrepareResponse("json", 201)
+	set ^testdata(id, 11) = $lb($ztimestamp, $job)
+	return response
 }
 
 /// Processes the payload.
@@ -94,10 +195,7 @@ ClassMethod processRequest(payload As %DynamicObject) As %DynamicObject
 			} elseif ^restforwarding = "ASYNC" {
 				// Job off the insertion into the production and ignore Business Service's response.
 				job ..CallServiceAsync(payload)
-				set result = payload.%Get("message",,$case(treat,1:"string",:"stream")).SizeGet()
-			} else {
-				// Throw exception: unknown forwarding method.
-				throw ##class(%Exception.StatusException).%New("Unknown option: %1",,,$lb(fwdMethod))
+				set result = payload.%Get("message",,$case(^treatment,1:"string",:"stream")).SizeGet()
 			}
 		}
 
@@ -119,117 +217,117 @@ ClassMethod processRequest(payload As %DynamicObject) As %DynamicObject
 
 /// Jobs off the call to a Business Service to simulate asynchronous calling.
 /// The calls <var>result</var> argument is simply ignored.
-ClassMethod CallServiceAsync(payload As %DynamicObject) As %Status
+ClassMethod CallServiceAsync(serviceName As %String, payload As %DynamicObject) As %Status
 {
-	set st = ##class(Ens.Director).CreateBusinessService("Demo.Service", .service)
-	$$$ThrowOnError(st)
+	set st = ##class(Ens.Director).CreateBusinessService(serviceName, .service)
 	set st = service.ProcessInput(payload, .result)
-	$$$ThrowOnError(st)
 	/// TODO: Uniform behavior: either "return" or "quit".
-	quit $$$OK
+	return $$$OK
 }
 
-/// Returns the number of test requests.
-ClassMethod getCount() As %Integer
+/// Returns all test settings.
+ClassMethod getAllSettings() As %DynamicObject
 {
-	&sql(SELECT TOP 1 RequestCount INTO :count FROM Demo.Settings)
-	do ..PrepareResponse()
-	return count
-}
+	set output = {}
 
-/// Stores the number of test requests.
-ClassMethod setCount(count) As %String
-{
-	&sql(Update Demo.Settings SET RequestCount = :count)
-	do ..PrepareResponse()
-	return "OK"
-}
+	// Client-side settings.
+	set sql = "SELECT * FROM Demo.Settings"
+	set resultset = ##class(%SQL.Statement).%ExecDirect(, .sql)
+	do resultset.%GetRow(.row)
+	set metadata = resultset.%GetMetadata()
+	for i=2:1:metadata.columnCount // Skip first (ID) column.
+	{
+		do output.%Set( $zconvert(metadata.columns.GetAt(i).colName, "L") , $lg(row,i) )
+	}
 
-/// Returns the size of each request's payload.
-ClassMethod getSize() As %Integer
-{
-	&sql(SELECT TOP 1 RequestSize INTO :size FROM Demo.Settings)
-	do ..PrepareResponse()
-	return size
-}
-
-/// Stores the payload size of the test requests.
-ClassMethod setSize(size) As %String
-{
-	&sql(Update Demo.Settings SET RequestSize = :size)
-	do ..PrepareResponse()
-	return "OK"
-}
-
-/// Returns 1 if the request payload is processed as a string.
-ClassMethod getPayloadTreatment() As %String
-{
-	&sql(SELECT TOP 1 TreatAsString INTO :treat FROM Demo.Settings)
-	do ..PrepareResponse()
-	return treat
-}
-
-/// Stores the setting of how the request payload is processed (string or stream).<br/>
-ClassMethod setPayloadTreatment(treat As %Boolean) As %String
-{
-	&sql(Update Demo.Settings SET TreatAsString = :treat)
-	set ^treatment = treat
-	do ..PrepareResponse()
-	return "OK"
-}
-
-/// Returns the client synchronization method.
-ClassMethod getClientSync() As %Integer
-{
-	&sql(SELECT TOP 1 ClientSync INTO :sync FROM Demo.Settings)
-	do ..PrepareResponse()
-	return sync
-}
-
-/// Stores the client synchronization method.
-ClassMethod setClientSync(sync As %Boolean) As %String
-{
-	&sql(UPDATE Demo.Settings SET ClientSync = :sync)
-	set ^clientsync = sync
-	do ..PrepareResponse()
-	return "OK"
-}
-
-/// Returns the processing delay of the server's Business Process.
-ClassMethod getDelay() As %Integer
-{
-	// https://community.intersystems.com/post/getting-production-settings-value
-	set delay = ##class(Ens.Director).GetItemSettingValue("Demo.Process","Host","Delay")
-	do ..PrepareResponse()
-	return delay
-}
-
-/// Sets the processing delay of the server's Business Process.
-ClassMethod setDelay(delay As %Integer) As %String
-{
-	set settings("Demo.Process", "Host", "Delay") = delay
-	set st = ##class(Ens.Production).ApplySettings("Demo.Production",.settings)
-	do ..PrepareResponse()
-	return "OK"
-}
-
-/// Returns the poolsize of the server's Business Process.
-ClassMethod getPoolsize() As %Integer
-{
-	set st = ##class(Ens.Config.Item).NameExists("Demo.Production","Demo.Process",.id)
+	// Host settings.
+	set st = ##class(Ens.Config.Item).NameExists("Demo.Production", "Demo.StreamProcess", .id)
 	set item = ##class(Ens.Config.Item).%OpenId(id)
-	do ..PrepareResponse()
-  	return item.PoolSize
+	do output.%Set("bppoolsize", item.PoolSize)
+
+	// Delay - https://community.intersystems.com/post/getting-production-settings-value
+	set delay = ##class(Ens.Director).GetItemSettingValue("Demo.StreamProcess", "Host", "Delay")
+	do output.%Set("bpdelay", delay)
+	
+	set sync = ##class(Ens.Director).GetItemSettingValue("Demo.StreamService","Host","Sync")
+	do output.%Set("bssync", sync)
+
+	do ..PrepareResponse("json")
+	return output
 }
 
-/// Sets the poolsize of the server's Business Process.
-ClassMethod setPoolsize(poolsize As %Integer) As %String
+/// Returns a setting.
+ClassMethod getSetting(settingname As %String) As %String
 {
-	set st = ##class(Ens.Config.Item).NameExists("Demo.Production","Demo.Process",.id)
-	set item = ##class(Ens.Config.Item).%OpenId(id)
-	set item.PoolSize = poolsize
-	set st = item.%Save()
 	do ..PrepareResponse()
+	
+	if settingname = "bppoolsize"
+	{
+		set st = ##class(Ens.Config.Item).NameExists("Demo.Production", "Demo.StreamProcess", .id)
+		set item = ##class(Ens.Config.Item).%OpenId(id)
+		return item.PoolSize
+	}
+
+	if settingname = "bpdelay"
+	{
+		return ##class(Ens.Director).GetItemSettingValue("Demo.StreamProcess", "Host", "Delay")
+	}
+
+	if settingname = "bssync"
+	{
+		return ##class(Ens.Director).GetItemSettingValue("Demo.StreamService","Host","Sync")
+	}
+
+	set sql = "SELECT TOP 1 " _ settingname _ " FROM Demo.Settings"
+	set rset = ##class(%SQL.Statement).%ExecDirect(, .sql)
+	do rset.%Next()
+	return rset.%GetData(1)
+}
+
+/// Stores a setting and updates the production, if applicable.
+ClassMethod updateSetting(settingname As %String, settingvalue As %String) As %Stream.Object
+{
+	do ..PrepareResponse()
+
+	if settingname = "bppoolsize"
+	{
+		for bpname = "Demo.StreamProcess","Demo.StringProcess"
+		{
+			set st = ##class(Ens.Config.Item).NameExists("Demo.Production", bpname, .id)
+			set item = ##class(Ens.Config.Item).%OpenId(id)
+			set item.PoolSize = settingvalue
+			set st = item.%Save()
+		}
+		return "OK"
+	}
+
+	if settingname = "bpdelay"
+	{
+		set settings("Demo.StreamProcess", "Host", "Delay") = settingvalue
+		set settings("Demo.StringProcess", "Host", "Delay") = settingvalue
+		set st = ##class(Ens.Production).ApplySettings("Demo.Production", .settings)
+		return "OK"
+	}
+
+	if settingname = "bssync"
+	{
+		set settings("Demo.StreamService", "Host", "Sync") = settingvalue
+		set settings("Demo.StringService", "Host", "Sync") = settingvalue
+		set st = ##class(Ens.Production).ApplySettings("Demo.Production", .settings)
+		return "OK"
+	}
+
+	set sql = "UPDATE Demo.Settings SET " _ settingname _ " = ?"
+	set st = ##class(%SQL.Statement).%ExecDirect( , .sql, settingvalue)
+
+	// Stop unused production items, so we don't use up more resources than we need.
+	if settingname = "payloaddatatype"
+	{
+		set st = ##class(Ens.Director).EnableConfigItem("Demo.StreamService", settingvalue = "stream" )
+		set st = ##class(Ens.Director).EnableConfigItem("Demo.StreamProcess", settingvalue = "stream" )
+		set st = ##class(Ens.Director).EnableConfigItem("Demo.StringService", settingvalue = "string" )
+		set st = ##class(Ens.Director).EnableConfigItem("Demo.StringProcess", settingvalue = "string" )
+	}
 	return "OK"
 }
 
@@ -241,52 +339,12 @@ ClassMethod PrepareResponse(mimeType As %String = "text", statusCode As %Integer
 	return $$$OK
 }
 
-/// Returns the Sync settings of the Business Service.
-ClassMethod getServiceSync() As %Integer
-{
-	set sync = ##class(Ens.Director).GetItemSettingValue("Demo.Service","Host","Sync")
-	do ..PrepareResponse()
-	return sync
-}
-
-/// Sets the Sync parameter of the Business Service.
-ClassMethod setServiceSync(sync As %Integer) As %String
-{
-	set settings("Demo.Service", "Host", "Sync") = sync
-	set st = ##class(Ens.Production).ApplySettings("Demo.Production",.settings)
-	set ^servicesync = sync
-	do ..PrepareResponse()
-	return "OK"
-}
-
-/// Returns the forwarding method of the REST class.
-ClassMethod getForwardingMethod() As %String
-{
-	&sql(SELECT TOP 1 RestForwardingMethod INTO :method FROM Demo.Settings)
-	do ..PrepareResponse()
-	return method
-}
-
-/// Stores the forwarding method of the REST class.
-ClassMethod setForwardingMethod(method As %String) As %String
-{
-	&sql(UPDATE Demo.Settings SET RestForwardingMethod = :method)
-	if SQLCODE = 0 {
-		set ^restforwarding = method
-		do ..PrepareResponse()
-		return "OK"
-	} else {
-		// TODO: Decent error message.
-		do ..PrepareResponse( , 400)
-		return "ERROR. SQLCODE = " _ SQLCODE
-	}
-}
-
 /// Removes all data points.
 ClassMethod deleteData() As %DynamicObject
 {
 	kill ^testdata
-	&sql(TRUNCATE TABLE Demo.Message)
+	&sql(TRUNCATE TABLE Demo.StreamMessage)
+	&sql(TRUNCATE TABLE Demo.StringMessage)
 	do ..PrepareResponse()
 	return "OK"
 }
@@ -333,7 +391,7 @@ ClassMethod AddDataSeries(ByRef dataObject As %DynamicObject, seriesName As %Str
 			do dataObject.%Get(seriesName).%Get("pid").%Push( pid, "number")
 		}
 	}
-	quit $$$OK
+	return $$$OK
 }
 
 /// Returns the Unix epoch with fractional seconds of a $HOROLOG value.
