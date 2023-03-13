@@ -160,68 +160,12 @@ ClassMethod storeMessageWithStreamPayload(message As %DynamicObject) As %Dynamic
 	return response
 }
 
-/// Processes the payload.
-ClassMethod processRequest(payload As %DynamicObject) As %DynamicObject
-{
-	try {
-		set id = payload.%Get("id")
-		set ^testdata(id, 2) = $lb($ztimestamp, $job)
-		set ^testdata(id, 0) = $lb(id, $job) // Allows for more uniform data handling.
-
-		#; &sql(SELECT TOP 1 RestForwardingMethod, TreatAsString INTO :fwdMethod, :treat FROM Demo.Settings)
-		#; Use ^restforwarding and ^treatment instead.
-
-		if ^restforwarding = "STORE" {
-			// Store message without sending it to the production.
-			if ^treatment = 0 {
-    			set msg = payload.%Get("message",,"stream")
-				&sql(INSERT INTO Demo.Message(Id, PayloadStream) VALUES(:id,:msg))
-			} else {
-    			set msg = payload.%Get("message",,"string")
-				&sql(INSERT INTO Demo.Message(Id, PayloadString) VALUES(:id,:msg))
-			}
-			set result = msg.SizeGet()
-		} else {
-			// Forward request to the production.
-			set ^testdata(id, 3) = $lb($ztimestamp, $job)
-			
-			if ^restforwarding = "SYNC" {
-				// The standard way.
-				set st = ##class(Ens.Director).CreateBusinessService("Demo.Service", .service)
-				$$$ThrowOnError(st)
-				set st = service.ProcessInput(payload, .result)
-				$$$ThrowOnError(st)
-				set ^testdata(id, 10) = $lb($ztimestamp, $job)
-			} elseif ^restforwarding = "ASYNC" {
-				// Job off the insertion into the production and ignore Business Service's response.
-				job ..CallServiceAsync(payload)
-				set result = payload.%Get("message",,$case(^treatment,1:"string",:"stream")).SizeGet()
-			}
-		}
-
-		// Compose REST response.
-		set response = {}.%Set("id", id).%Set("size", result)
-		do ..PrepareResponse("json", 201)
-		do response.%Set("status","OK")
-	} catch ex {
-		set msg = "ERROR | code: " _ ex.Code
-		_ $c(13,10) _ "name: " _ ex.Name
-		_ $c(13,10) _ "location: " _ ex.Location
-		_ $c(13,10) _ "data: " _ ex.Data
-		do ..PrepareResponse( , 500)
-		do response.%Set("status", msg)
-	}
-	set ^testdata(id, 11) = $lb($ztimestamp, $job)
-	return response
-}
-
 /// Jobs off the call to a Business Service to simulate asynchronous calling.
-/// The calls <var>result</var> argument is simply ignored.
+/// The call's <var>result</var> argument is simply ignored.
 ClassMethod CallServiceAsync(serviceName As %String, payload As %DynamicObject) As %Status
 {
 	set st = ##class(Ens.Director).CreateBusinessService(serviceName, .service)
 	set st = service.ProcessInput(payload, .result)
-	/// TODO: Uniform behavior: either "return" or "quit".
 	return $$$OK
 }
 
@@ -398,7 +342,7 @@ ClassMethod AddDataSeries(ByRef dataObject As %DynamicObject, seriesName As %Str
 /// The default precision is 6 decimals, i.e. microseconds.
 ClassMethod ts2uf(horolog As %String, precision As %Integer = 6) As %Double
 {
-	return $zdatetime(horolog,-2) _ "." _ $e($p($p(horolog,",",2),".",2),1,precision)
+	return $zdatetime(horolog, -2) _ "." _ $e($p($p(horolog, ",", 2), ".", 2), 1, precision)
 }
 
 }

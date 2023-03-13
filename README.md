@@ -14,4 +14,6 @@ If you have the **make** utility installed, you can also issue
 ## Usage
 
 Access the user interface at <http://localhost:9090/csp/demo/ui.html>.
-and the server at <http://localhost:9090/csp/sys/utilhome.csp>.
+Pick your settings on the left and run the test.
+
+The server is accessible at <http://localhost:9090/csp/sys/utilhome.csp>.

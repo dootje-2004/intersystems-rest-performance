@@ -66,11 +66,11 @@ function refreshDashboard(){
         let timeBS = subtractArrays( data.bsRespOut.y, data.bsReqIn.y );
         let timeAPI = subtractArrays( data.apiRespOut.y, data.apiReqIn.y );
         let timeRoundtrip = subtractArrays( clRespIn, clReqOut );
-
+        
         let timeNet = subtractArrays( timeRoundtrip, timeAPI );
-        timeAPI = subtractArrays( timeAPI, timeBS );
-        timeBS = subtractArrays( timeBS, timeBP );
-
+        if ( timeBS.length == timeAPI.length ) timeAPI = subtractArrays( timeAPI, timeBS );
+        if ( timeBP.length == timeBS.length ) timeBS = subtractArrays( timeBS, timeBP );
+        
         // Convert seconds to milliseconds.
         timeBP = multiplyArray( timeBP, 1000 );
         timeBS = multiplyArray( timeBS, 1000 );
@@ -192,14 +192,17 @@ function sendTestMessage(url,body,callback){
 }
 
 function subtractArrays(a,b) {
+    if ( ! ( Array.isArray(a) && Array.isArray(b) && a.length == b.length ) ) return [];
     return a.map(function(item, index) { return item - b[index]; });
 }
 
 function multiplyArray(a,m) {
+    if ( ! Array.isArray( a ) ) return false;
     return a.map(function(item, index) { return item * m; });
 }
 
 function avg(arr) {
+    if ( ! Array.isArray( arr ) ) return false;
     return arr.reduce( (a,b)=> a + b, 0) / arr.length || 0;
 }
 

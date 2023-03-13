@@ -40,6 +40,7 @@ Adding `command: --check-caps false` to `docker-compose.yml` fixes it.
 *Fractional seconds values in a BP's `<delay>` setting make it zero.*
 This is [the normal behaviour](https://docs.intersystems.com/iris20222/csp/docbook/DocBook.UI.Page.cls?KEY=EBPLR_delay#EBPLR_delay_details).
 As a consequence, we cannot use the `<delay>` action as is.
+We use the `hang` command instead.
 
 *The `%FromJSON()` method fails for large property values*
 If the string length of a dynamic object's property exceeds IRIS's maximum string
@@ -53,6 +54,7 @@ The contents of a `.DFI` file as shown in the VScode editor are not accepted by
 the `$system.OBJ.Load()` method.
 We need to export the DeepSee item first. This is easiest done through the
 Management Portal.
+Update: We opt to use Highcharts in the browser instead of a DeepSee dashboard.
 
 *The client Demo production is not autostarted*
 Turns out there is a `.DS_Store` file in the `/src` directory that is copied into
