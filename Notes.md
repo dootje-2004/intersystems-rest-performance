@@ -256,7 +256,7 @@ configure that ZPM repo in the container, and install from there.
 This last method is most in line with the intended use,
 and does not clutter the container setup.
 
-### Setting up ZPM
+### Setting up a local ZPM registry
 
 * Start a new IRIS container acting as a local registry:
 `docker run --name zpm-registry -d -p 9001:52773 intersystemsdc/iris-community:2022.1.0.209.0-zpm --check-caps false`.
@@ -294,6 +294,7 @@ Both packages (**objectscript-math** and **rest-demo**) should be listed.
 
 * Get the hostname of the registry container with
 `docker inspect -f '{{.Config.Hostname}}' zpm-registry`.
+The hostname can also be seen in the upper-left corner of the Management Portal of the registry container.
 We need this for setting up the registry reference on the REST container.
 The Docker hostname is usually a random hexadecimal string like `8e763a6c85c1`.
 
