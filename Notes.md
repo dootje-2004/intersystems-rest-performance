@@ -329,13 +329,17 @@ Pay special attention to the *Available* setting. This must read *Yes* for the r
 
 After all this setting up, all we need to do is issue `install rest-demo` in the ZPM shell on the REST container.
 
-TODO: This does not work yet. Needs reconfiguring.
-
 Upon `install rest-demo` we get
 
-```
+```text
 ERROR! Error copying directory /usr/irissys/mgr/.modules/TEST/rest-demo/0.0.1/.${CSPDIR}/ to /init/html/
   > ERROR #5021: Directory '/usr/irissys/mgr/.modules/TEST/rest-demo/0.0.1/.${CSPDIR}/' does not exist.
 ```
 
 This suggests that source and destination are mixed up.
+With `SourcePath="/init/html" DeployPath="/usr/irissys/csp/test"` (avoiding the `$cspdir` variable) the install succeeds.
+The files are now copied to the correct location.
+
+Set the `/csp/test` web application to **Unauthenticated**.
+Remove any required resources.
+We can now see the test page at <http://localhost:9090/csp/test/ui.html>.
