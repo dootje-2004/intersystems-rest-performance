@@ -8,7 +8,7 @@
       <Keywords>REST API, performance</Keywords>
       <Packaging>module</Packaging>
       <CSPApplication Url="/csp/demo" DeployPath="/init/html" SourcePath="${cspdir}/demo" ServeFiles="1" Recurse="1" CookiePath="/demo" />
-      <SourcesRoot>src/Demo</SourcesRoot>
+      <SourcesRoot>src</SourcesRoot>
       <Resource Name="Demo.PKG"/>
     </Module>
   </Document>

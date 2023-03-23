@@ -255,3 +255,77 @@ The third option is to set up a repo server on the Docker host (as described
 configure that ZPM repo in the container, and install from there.
 This last method is most in line with the intended use,
 and does not clutter the container setup.
+
+### Setting up ZPM
+
+* Start a new IRIS container acting as a local registry:
+`docker run --name zpm-registry -d -p 9001:52773 intersystemsdc/iris-community:2022.1.0.209.0-zpm --check-caps false`.
+
+* Open the Management Portal at `http://localhost:9001/csp/sys/utilhome.csp` and give the **_system** user a new password.
+
+* Get a command line inside the container with `docker exec -it zpm-registry iris session iris`.
+You will find yourself in the **USER** namespace.
+
+* Open the ZPM shell with `zpm`.
+
+* Install **zpm-registry** with `install zpm-registry`.
+
+* As a test, add [the math example](https://github.com/psteiwer/ObjectScript-Math) by sending a HTTP POST request
+to <http://localhost:9001/registry/package> with a JSON body `{"repository": "https://github.com/psteiwer/ObjectScript-Math"}`.
+Use basic authentication with user **_system** and the password you set earlier.
+
+* Verify that the new registry works by sending a GET request to <http://localhost:9001/registry/packages/-/all>.
+The **objectscript-math** package should be listed.
+
+* On GitHub, make [the **intersystems-rest-performance** repo](https://github.com/dootje-2004/intersystems-rest-performance)
+public.
+
+* Add the repo to the registry by issuing a POST request to <http://localhost:9001/registry/package>.
+Attach a JSON body `{"repository": "https://github.com/dootje-2004/intersystems-rest-performance"}`.
+As before, use appropriate authentication.
+
+* Repeat the verification by sending a GET request to <http://localhost:9001/registry/packages/-/all>.
+Both packages (**objectscript-math** and **rest-demo**) should be listed.
+
+### Connecting to the local registry
+
+* Make sure that the registry container is on the same Docker network as the REST container:
+`docker network connect intersystems-rest-demo_default zpm-registry`.
+
+* Get the hostname of the registry container with
+`docker inspect -f '{{.Config.Hostname}}' zpm-registry`.
+We need this for setting up the registry reference on the REST container.
+The Docker hostname is usually a random hexadecimal string like `8e763a6c85c1`.
+
+* We install the package in a separate namespace of the existing REST container.
+We expect future users to create a dedicated namespace themselves.
+Our new namespace is called **TEST**. We set it up through the Management Portal.
+
+* Open a terminal inside the REST container with `docker exec -it rest-demo-server iris session iris`.
+
+* Switch to the **TEST** namespace with `zn "TEST"`.
+
+* Open the **ZPM** shell with `zpm`.
+
+* Add the local registry to the registry pool with
+`repo -n local -r -url http://<hostname>:52773/registry/ -user _system -pass <password>`.
+ZPM should respond with something like
+
+```text
+local
+        Source:                 http://8e763a6c85c1:52773/registry/
+        Enabled?                Yes
+        Available?              Yes
+        Use for Snapshots?      Yes
+        Use for Prereleases?    Yes
+        Is Read-Only?           No
+        Deployment Enabled?     No
+```
+
+Pay special attention to the *Available* setting. This must read *Yes* for the registry server to work as expected.
+
+### Installing the package from the local registry
+
+After all this setting up, all we need to do is issue `install rest-demo` in the ZPM shell on the REST container.
+
+TODO: This does not work yet. Needs reconfiguring.
