@@ -330,3 +330,12 @@ Pay special attention to the *Available* setting. This must read *Yes* for the r
 After all this setting up, all we need to do is issue `install rest-demo` in the ZPM shell on the REST container.
 
 TODO: This does not work yet. Needs reconfiguring.
+
+Upon `install rest-demo` we get
+
+```
+ERROR! Error copying directory /usr/irissys/mgr/.modules/TEST/rest-demo/0.0.1/.${CSPDIR}/ to /init/html/
+  > ERROR #5021: Directory '/usr/irissys/mgr/.modules/TEST/rest-demo/0.0.1/.${CSPDIR}/' does not exist.
+```
+
+This suggests that source and destination are mixed up.
