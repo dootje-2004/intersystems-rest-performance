@@ -209,13 +209,11 @@ TODO: Difference between Docker and bare-metal (e.g. network speed)?
 TODO: ZPM package for bare-metal install.
 
 * Compare scenarios two by two (instead of collecting test results for comparison):
-not implmented. The user can open as many browser tabs as they wish and compare
+not implemented. The user can open as many browser tabs as they wish and compare
 results between them.
 
 TODO: Database expansion: determine and set size
 before starting a test to eliminate overhead.
-
-TODO: Influence of how streams are handled as compared to strings.
 
 TODO: Influence of stream compression.
 %Stream.GlobalCharacter property met parameter COMPRESS = -1.
@@ -224,5 +222,36 @@ See [here](https://docs.intersystems.com/iris20222/csp/documatic/%25CSP.Documati
 It turns out that embedded SQL calls can be quite costly.
 We have replaced the most time-critical ones by globals
 (^clientsync, ^treatment, ^restforwarding).
+This, in turn, has been superseded by creating totally separate paths for
+the different options.
 
 The maximum string length is returned by `$system.SYS.MaxLocalLength()`.
+
+## IPM (formerly known as ZPM)
+
+Things to consider when preparing the app for the InterSystems Package Manager:
+
+* Naming: Sources must reside in `/src/cls/company/project/subpackage/ClassNames.cls`.
+See [this post by Evgeny](https://community.intersystems.com/post/objectscript-package-manager-naming-convention).
+
+* IRIS Community Version Docker images are IPM-ready. The command is still `zpm`.
+
+* Configure a local filesystem repo with
+`repo -name <repo name> -filesystem -path <absolute path>`.
+If packages are not installed at the top level of the repo, use the `depth` parameter.
+
+* The IRIS container came with ZPM version 0.4.0.
+Update to the latest version by executing `install zpm` in the zpm shell.
+This updates the ZPM client to version 0.5.3.
+
+* To install our IPM package in a container, we have three options.
+The first is to copy the package into the container at build time,
+configure a local repo and install from there.
+This would replace part of the Docker commands.
+The second option is to map the local repo to a Docker volume
+and install from there.
+The third option is to set up a repo server on the Docker host (as described
+[here](https://community.intersystems.com/post/setting-your-own-intersystems-objectscript-package-manager-registry)),
+configure that ZPM repo in the container, and install from there.
+This last method is most in line with the intended use,
+and does not clutter the container setup.

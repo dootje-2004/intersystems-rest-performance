@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+  <Document name="rest-demo.ZPM">
+    <Module>
+      <Name>rest-demo</Name>
+      <Version>0.0.1</Version>
+      <Description>REST performance demo</Description>
+      <Keywords>REST API, performance</Keywords>
+      <Packaging>module</Packaging>
+      <CSPApplication Url="/csp/demo" DeployPath="/init/html" SourcePath="${cspdir}/demo" ServeFiles="1" Recurse="1" CookiePath="/demo" />
+      <SourcesRoot>src/Demo</SourcesRoot>
+      <Resource Name="Demo.PKG"/>
+    </Module>
+  </Document>
+</Export>

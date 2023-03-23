@@ -1,0 +1,315 @@
+Class Demo.spec Extends %REST.Spec [ ProcedureBlock ]
+{
+
+XData OpenAPI [ MimeType = application/json ]
+{
+{
+  "swagger":"2.0",
+  "info":{
+    "title":"InterSystems IRIS REST API ingestion demo (server)",
+    "description":"A simple REST interface to evaluate the ingestion speed of an InterSystems IRIS REST API.",
+    "contact":{
+      "name":"InterSystems Community",
+      "url":"https://openexchange.intersystems.com/"
+    },
+    "license":{
+      "name":"MIT license",
+      "url":"https://github.com/dootje-2004/intersystems-rest-demo/blob/main/LICENSE.txt"
+    },
+    "version":"0.0.1"
+  },
+  "basePath":"/demo",
+  "schemes":[
+    "http"
+  ],
+  "paths":{
+    "/call/forward/sync/stream":{
+      "post":{
+        "description":"Accepts a call; forwards message synchronously with stream payload.",
+        "consumes":[
+          "application/json"
+        ],
+        "produces":[
+          "application/json"
+        ],
+        "parameters":[
+          {
+            "name":"message",
+            "in":"body",
+            "schema":{
+              "$ref":"#/definitions/Message"
+            },
+            "required":true
+          }
+        ],
+        "responses":{
+          "201":{
+            "description":"Message has been saved"
+          },
+          "default":{
+            "description":"Unexpected error"
+          }
+        },
+        "operationId":"forwardMessageSyncWithStreamPayload"
+      }
+    },
+    "/call/forward/sync/string":{
+      "post":{
+        "description":"Accepts a call; forwards message synchronously with string payload.",
+        "consumes":[
+          "application/json"
+        ],
+        "produces":[
+          "application/json"
+        ],
+        "parameters":[
+          {
+            "name":"message",
+            "in":"body",
+            "schema":{
+              "$ref":"#/definitions/Message"
+            },
+            "required":true
+          }
+        ],
+        "responses":{
+          "201":{
+            "description":"Message has been saved"
+          },
+          "default":{
+            "description":"Unexpected error"
+          }
+        },
+        "operationId":"forwardMessageSyncWithStringPayload"
+      }
+    },
+    "/call/forward/async/stream":{
+      "post":{
+        "description":"Accepts a call; forwards message asynchronously with stream payload.",
+        "consumes":[
+          "application/json"
+        ],
+        "produces":[
+          "application/json"
+        ],
+        "parameters":[
+          {
+            "name":"message",
+            "in":"body",
+            "schema":{
+              "$ref":"#/definitions/Message"
+            },
+            "required":true
+          }
+        ],
+        "responses":{
+          "201":{
+            "description":"Message has been saved"
+          },
+          "default":{
+            "description":"Unexpected error"
+          }
+        },
+        "operationId":"forwardMessageAsyncWithStreamPayload"
+      }
+    },
+    "/call/forward/async/string":{
+      "post":{
+        "description":"Accepts a call; forwards message asynchronously with string payload.",
+        "consumes":[
+          "application/json"
+        ],
+        "produces":[
+          "application/json"
+        ],
+        "parameters":[
+          {
+            "name":"message",
+            "in":"body",
+            "schema":{
+              "$ref":"#/definitions/Message"
+            },
+            "required":true
+          }
+        ],
+        "responses":{
+          "201":{
+            "description":"Message has been saved"
+          },
+          "default":{
+            "description":"Unexpected error"
+          }
+        },
+        "operationId":"forwardMessageAsyncWithStringPayload"
+      }
+    },
+    "/call/store/string":{
+      "post":{
+        "description":"Accepts a call; stores message with string payload.",
+        "consumes":[
+          "application/json"
+        ],
+        "produces":[
+          "application/json"
+        ],
+        "parameters":[
+          {
+            "name":"message",
+            "in":"body",
+            "schema":{
+              "$ref":"#/definitions/Message"
+            },
+            "required":true
+          }
+        ],
+        "responses":{
+          "201":{
+            "description":"Message has been saved"
+          },
+          "default":{
+            "description":"Unexpected error"
+          }
+        },
+        "operationId":"storeMessageWithStringPayload"
+      }
+    },
+    "/call/store/stream":{
+      "post":{
+        "description":"Accepts a call; stores message with stream payload.",
+        "consumes":[
+          "application/json"
+        ],
+        "produces":[
+          "application/json"
+        ],
+        "parameters":[
+          {
+            "name":"message",
+            "in":"body",
+            "schema":{
+              "$ref":"#/definitions/Message"
+            },
+            "required":true
+          }
+        ],
+        "responses":{
+          "201":{
+            "description":"Message has been saved"
+          },
+          "default":{
+            "description":"Unexpected error"
+          }
+        },
+        "operationId":"storeMessageWithStreamPayload"
+      }
+    },
+    "/settings":{
+      "get":{
+        "description":"Returns all test settings.",
+        "produces":[
+          "application/json"
+        ],
+        "responses":{
+          "200":{
+            "description":"Value is returned normally."
+          }
+        },
+        "operationId":"getAllSettings"
+      }
+    },
+    "/setting/{settingname}":{
+      "get":{
+        "description":"Returns a setting.",
+        "parameters":[
+          {
+            "in":"path",
+            "type":"string",
+            "name":"settingname",
+            "required":true
+          }
+        ],
+        "produces":[
+          "text/plain"
+        ],
+        "responses":{
+          "200":{
+            "description":"Value is returned normally."
+          }
+        },
+        "operationId":"getSetting"
+      }
+    },
+    "/setting/{settingname}/{settingvalue}":{
+      "put":{
+        "description":"Stores a setting and updates it on the server if applicable.",
+        "parameters":[
+          {
+            "in":"path",
+            "type":"string",
+            "name":"settingname",
+            "required":true
+          },
+          {
+            "in":"path",
+            "type":"string",
+            "name":"settingvalue",
+            "required":true
+          }
+        ],
+        "produces":[
+          "text/plain"
+        ],
+        "responses":{
+          "200":{
+            "description":"Setting has been applied."
+          }
+        },
+        "operationId":"updateSetting"
+      }
+    },
+    "/data":{
+      "get":{
+        "description":"Returns all data points.",
+        "produces":[
+          "application/json"
+        ],
+        "responses":{
+          "200":{
+            "description":"Data returned normally."
+          }
+        },
+        "operationId":"getData"
+      },
+      "delete":{
+        "description":"Removes all data points.",
+        "produces":[
+          "text/plain"
+        ],
+        "responses":{
+          "200":{
+            "description":"Data deleted."
+          }
+        },
+        "operationId":"deleteData"
+      }
+    }
+  },
+  "definitions":{
+    "Message":{
+      "type":"object",
+      "properties":{
+        "id":{
+          "description":"Unique identifier",
+          "type":"integer"
+        },
+        "payload":{
+          "description":"Arbitrary string",
+          "type":"string"
+        }
+      }
+    }
+  }
+}
+}
+
+}
