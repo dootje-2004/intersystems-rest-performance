@@ -259,7 +259,7 @@ and does not clutter the container setup.
 ### Setting up a local ZPM registry
 
 * Start a new IRIS container acting as a local registry:
-`docker run --name zpm-registry -d -p 9001:52773 intersystemsdc/iris-community:2022.1.0.209.0-zpm --check-caps false`.
+`docker run --name zpm-registry -d -p 9001:52773 --hostname zpm intersystemsdc/iris-community:2022.1.0.209.0-zpm --check-caps false`.
 
 * Open the Management Portal at `http://localhost:9001/csp/sys/utilhome.csp` and give the **_system** user a new password.
 
@@ -292,11 +292,12 @@ Both packages (**objectscript-math** and **rest-demo**) should be listed.
 * Make sure that the registry container is on the same Docker network as the REST container:
 `docker network connect intersystems-rest-demo_default zpm-registry`.
 
-* Get the hostname of the registry container with
+* If you did not specify a hostname for the registry container, get it with
 `docker inspect -f '{{.Config.Hostname}}' zpm-registry`.
 The hostname can also be seen in the upper-left corner of the Management Portal of the registry container.
 We need this for setting up the registry reference on the REST container.
-The Docker hostname is usually a random hexadecimal string like `8e763a6c85c1`.
+If not set explicitly, the Docker hostname is usually a random hexadecimal string like `8e763a6c85c1`.
+We specified it to be `zpm`.
 
 * We install the package in a separate namespace of the existing REST container.
 We expect future users to create a dedicated namespace themselves.
@@ -309,7 +310,7 @@ Our new namespace is called **TEST**. We set it up through the Management Portal
 * Open the **ZPM** shell with `zpm`.
 
 * Add the local registry to the registry pool with
-`repo -n local -r -url http://<hostname>:52773/registry/ -user _system -pass <password>`.
+`repo -n local -r -url http://zpm:52773/registry/ -user _system -pass <password>`.
 ZPM should respond with something like
 
 ```text
@@ -343,3 +344,14 @@ The files are now copied to the correct location.
 Set the `/csp/test` web application to **Unauthenticated**.
 Remove any required resources.
 We can now see the test page at <http://localhost:9090/csp/test/ui.html>.
+
+TODO: The `/demo` entry point for Ajax calls is linked to a hard-coded namespace.
+The web application must also be created upon zpm installation.
+It must have a unique name.
+
+### Installing the package from a local file
+
+The code to install resides at `/Users/averlind/git/intersystems-rest-demo` on disk.
+It is copied to `/usr/irissys` inside the container.
+
+Add a local file-based repo with `repo -n localfiles -fs -d 1 -p /usr/irissys`.
