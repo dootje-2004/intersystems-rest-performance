@@ -8,9 +8,10 @@
       <Keywords>REST API, performance</Keywords>
       <Packaging>module</Packaging>
       <!--CSPApplication Url="/csp/demo" SourcePath="/init/html" DeployPath="/usr/irissys/csp/test" ServeFiles="1" Recurse="1" CookiePath="/demo" /-->
-      <CSPApplication Url="/csp/demo" SourcePath="/html" DeployPath="${cspdir}" ServeFiles="1" Recurse="1" CookiePath="/demo" />
+      <CSPApplication Url="/csp/demo" SourcePath="/html" DeployPath="${cspdir}/demo" ServeFiles="1" Recurse="1" CookiePath="/demo" />
       <SourcesRoot>src</SourcesRoot>
-      <Resource Name="Demo.PKG"/>
+      <!--Resource Name="Demo.PKG"/ -->
+      <CSPApplication Url="/demo" Recurse="1" UnauthenticatedEnabled="1" DispatchClass="Demo.disp" ServeFiles="1" CookiePath="/demo" UseCookies="2" />
     </Module>
   </Document>
 </Export>

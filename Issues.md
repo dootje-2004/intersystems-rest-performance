@@ -4,6 +4,8 @@
 
 TODO: When REST setting = ASYNC, no data points are collected.
 
+TODO: Is there a variable like `$cspdir` in *module.xml* that refers to the current namespace?
+
 ## Solved issues
 
 *What type of license is best for the GitHub repository?*
@@ -90,5 +92,6 @@ to the collection.
 
 ## Unsolved issues
 
-How to change the IRIS default instance name from `IRIS` to `REST CLIENT`
-or `REST SERVER`?
+*How to change the IRIS default instance name from `IRIS` to `REST CLIENT`
+or `REST SERVER`?*
+No longer relevant as we only have one instance (the server).

@@ -1,4 +1,7 @@
-# Tasks
+# Notes
+
+This document is primarily intended for the developer.
+It may be rewritten, or even entirely removed, after finishing this project.
 
 ## Set up a repository
 
@@ -25,15 +28,15 @@ Host *.github.com
 
 to `~/.ssh/config`.
 
-Add the new key to the keychain with `$ ssh-add -K ~/.ssh/github`.
+Add the new key to the keychain with `ssh-add -K ~/.ssh/github`.
 Note that the `--apple-use-keychain` option is rejected.
 
-Copy the public key to the clipboard with `$ pbcopy < ~/.ssh/github.pub`.
+Copy the public key to the clipboard with `pbcopy < ~/.ssh/github.pub`.
 
 In your GitHub account, paste the new key under **Settings** > **SSH and GPG keys**.
 We name it *mac os*.
 
-Finally, we can clone the new repository with `$ git clone git@github.com:dootje-2004/intersystems-rest-demo.git`.
+Finally, we can clone the new repository with `git clone git@github.com:dootje-2004/intersystems-rest-demo.git`.
 
 ## Create docker-compose file to run client and server containers
 
@@ -345,6 +348,8 @@ Set the `/csp/test` web application to **Unauthenticated**.
 Remove any required resources.
 We can now see the test page at <http://localhost:9090/csp/test/ui.html>.
 
+Reference: <https://community.intersystems.com/post/describing-modulexml-objectscript-package-manager>.
+
 TODO: The `/demo` entry point for Ajax calls is linked to a hard-coded namespace.
 The web application must also be created upon zpm installation.
 It must have a unique name.
@@ -352,6 +357,15 @@ It must have a unique name.
 ### Installing the package from a local file
 
 The code to install resides at `/Users/averlind/git/intersystems-rest-demo` on disk.
-It is copied to `/usr/irissys` inside the container.
+To include the IPM definition, we move `module.xml` inside the `init` directory, so it
+is available inside the container.
+Edit the paths in `module.xml` to reflect the change in relative paths for the CSP application.
 
-Add a local file-based repo with `repo -n localfiles -fs -d 1 -p /usr/irissys`.
+Add the local file-based repo with `repo -n localfiles -fs -d 1 -p /usr/irissys`.
+
+Install with `install rest-demo`.
+
+The page <http://localhost:9090/csp/rest-performance/ui.html> should now be available.
+
+TODO: A better name for this project is *rest-performance* instead of *rest-demo*.
+We should rename all occurrences accordingly.
