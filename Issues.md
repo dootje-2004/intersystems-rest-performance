@@ -2,9 +2,9 @@
 
 ## Open issues
 
-TODO: When REST setting = ASYNC, no data points are collected.
-
 TODO: Is there a variable like `$cspdir` in *module.xml* that refers to the current namespace?
+
+TODO: ZPM install conflicts with existing REST class.
 
 ## Solved issues
 
@@ -88,6 +88,9 @@ If you don't, the order of the methods is jumbled and the editor (and mabe IRIS 
 won't render them correctly.
 Note that the sequence number is contiguous over ALL class children (methods, parameters,
 properties, indices, etc.). This is especially important if you add a new method
+
+*When REST setting = ASYNC, no data points are collected.*
+Bug in *app.js* when subtracting data arrays. Fixed.
 to the collection.
 
 ## Unsolved issues

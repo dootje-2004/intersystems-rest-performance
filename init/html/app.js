@@ -20,13 +20,17 @@ $(document).ready(function(){
     }, 'json' );
 
     // Attach behaviors.
-    $('#request-count').on( 'change', function(){ $.ajax({ method: 'PUT', url: '/demo/setting/callcount/' + $(this).val() }); });
-    $('#request-size').on( 'input', function(){ 
-        $.ajax({ method: 'PUT', url: '/demo/setting/payloadsize/' + $(this).val() }); 
-        if ($(this).val() > 3641144) {
-            $('#request-type').prop('checked', false).prop('disabled',true);
-        } else {
-            $('#request-type').prop('disabled', false);
+    $('#request-count').on( 'input', function(){
+        if (checkMaximumDatabaseSize) $.ajax({ method: 'PUT', url: '/demo/setting/callcount/' + $(this).val() });
+    });
+    $('#request-size').on( 'input', function(){
+        if (checkMaximumDatabaseSize){
+            $.ajax({ method: 'PUT', url: '/demo/setting/payloadsize/' + $(this).val() }); 
+            if ($(this).val() > 3641144) {
+                $('#request-type').prop('checked', false).prop('disabled',true);
+            } else {
+                $('#request-type').prop('disabled', false);
+            }
         }
     });
     $('#request-type').on( 'change', function(){ 
@@ -189,6 +193,19 @@ function sendTestMessage(url,body,callback){
             }
         }
     });
+}
+
+function checkMaximumDatabaseSize() {
+    // 33553904 is the maximum size (in MB) for an 8K IRIS database.
+    if ( 1.1 * $('#request-count').val() * $('#request-size').val() / 1000000 > 33553904 ) {
+        alert( `This combination of request count and payload size
+                exceeds the maximum database size.
+
+                The product of both settings must not exceed 30503549000.`
+        );
+        return false;
+    }
+    return true;
 }
 
 function subtractArrays(a,b) {

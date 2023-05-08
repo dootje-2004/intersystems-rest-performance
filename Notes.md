@@ -215,8 +215,9 @@ TODO: ZPM package for bare-metal install.
 not implemented. The user can open as many browser tabs as they wish and compare
 results between them.
 
-TODO: Database expansion: determine and set size
+* Database expansion: determine and set size
 before starting a test to eliminate overhead.
+Note that [an 8K database cannot exceed 33553904 MB in size](https://docs.intersystems.com/iris20231/csp/documatic/%25CSP.Documatic.cls?LIBRARY=%25SYS&CLASSNAME=SYS.Database).
 
 TODO: Influence of stream compression.
 %Stream.GlobalCharacter property met parameter COMPRESS = -1.

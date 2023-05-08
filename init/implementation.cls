@@ -264,6 +264,16 @@ ClassMethod updateSetting(settingname As %String, settingvalue As %String) As %S
 	set sql = "UPDATE Demo.Settings SET " _ settingname _ " = ?"
 	set st = ##class(%SQL.Statement).%ExecDirect( , .sql, settingvalue)
 
+	// Expand database to avoid overhead during testing.
+	if settingname = "callcount"
+	{
+		set st = ..fitDatabaseSize(settingvalue)
+	}
+	if settingname = "payloadsize"
+	{
+		set st = ..fitDatabaseSize( , settingvalue)
+	}
+
 	// Stop unused production items, so we don't use up more resources than we need.
 	if settingname = "payloaddatatype"
 	{
@@ -273,6 +283,31 @@ ClassMethod updateSetting(settingname As %String, settingvalue As %String) As %S
 		set st = ##class(Ens.Director).EnableConfigItem("Demo.StringProcess", settingvalue = "string" )
 	}
 	return "OK"
+}
+
+/// If necessary, expands the DEMO database to accomodate the specified
+/// <var>callcount</var> and <var>payloadsize</var>.
+ClassMethod fitDatabaseSize(callcount As %Integer = 0, payloadsize As %Integer = 0) As %Status
+{
+	if callcount = 0
+	{
+		&sql(SELECT TOP 1 callcount INTO :callcount FROM Demo.Settings)
+	}
+	if payloadsize = 0
+	{
+		&sql(SELECT TOP 1 payloadsize INTO :payloadsize FROM Demo.Settings)
+	}
+	set thisNamespace = $ZNSPACE
+	znspace "%SYS"
+	set db = ##class(SYS.Database).%OpenId("DEMO")
+	if db.Size < (callcount * payloadsize / 1000000)
+	{
+		// Allow for a 10% margin.
+		set db.Size = 1.1 * callcount * payloadsize / 1000000
+		set st = db.%Save()
+	}
+	znspace thisNamespace
+	return st
 }
 
 /// Sets the response's content type and statuscode.
